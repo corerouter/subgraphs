@@ -18,11 +18,11 @@ type Token @entity {
   " The number of decimal places this token uses, default to 18 "
   decimals: Int!
 
-  " Token flags"
-  flags: [String!]!
+  " Total number of unique token holders who are currently holding more the token "
+  currentHolderCount: BigInt!
 
-  " Number of unique token holders "
-  holderCount: BigInt!
+  " Total number of cumulative unique token holders who held or are holding the token "
+  cumulativeHolderCount: BigInt!
 
   " Total number of token transfer events "
   transferCount: BigInt!
@@ -36,11 +36,17 @@ type Token @entity {
   " Total token supply "
   totalSupply: BigDecimal!
 
+  " Total token minted "
+  totalMinted: BigDecimal!
+
   " Total token burned "
   totalBurned: BigDecimal!
 
-  " Total token minted "
-  totalMinted: BigDecimal!
+  " Transaction hash of the latest transaction that emitted mint event "
+  lastMintTransactionHash: String!
+
+  " Transaction hash of the latest transaction that emitted burn event "
+  lastBurnTransactionHash: String!
 
   " List of token transfers "
   transfers: [TransferEvent!]! @derivedFrom(field: "token")
@@ -52,7 +58,6 @@ type Token @entity {
 
   " Daily snapshot for this token "
   dailyTokenSnapshot: [TokenDailySnapshot!]! @derivedFrom(field: "token")
-
 }
 
 ###############################
@@ -69,14 +74,11 @@ type TokenDailySnapshot @entity {
   " Daily total Supply of the token "
   dailyTotalSupply: BigDecimal!
 
-  " # of accounts holding this token "
-  dailyHolderCount: BigInt!
+  " number of accounts holding the token "
+  currentHolderCount: BigInt!
 
-  " # of unique daily active users/holders "
-  dailyActiveUsers: BigInt!
-
-  " # of cumulative unique users/holders "
-  cumulativeUniqueUsers: BigInt!
+  " number of cumulative unique holders "
+  cumulativeHolderCount: BigInt!
 
   " Total number of events occurred in a day "
   dailyEventCount: Int!
@@ -116,14 +118,11 @@ type TokenHourlySnapshot @entity {
   " Hourly total Supply of the token "
   hourlyTotalSupply: BigDecimal!
 
-  " # of accounts holding this token "
-  hourlyHolderCount: BigInt!
+  " number of accounts holding this token "
+  currentHolderCount: BigInt!
 
-  " # of unique hourly active users "
-  hourlyActiveUsers: BigInt!
-
-  " # of cumulative unique users "
-  cumulativeUniqueUsers: BigInt!
+  " number of cumulative unique holders "
+  cumulativeHolderCount: BigInt!
 
   " Total number of events occurred in an hour "
   hourlyEventCount: Int!
@@ -237,7 +236,8 @@ type Account @entity {
   balances: [AccountBalance!]! @derivedFrom(field: "account")
 
   " Token balances snapshot that this account holds "
-  balancesSnapshot: [AccountBalanceDailySnapshot!]! @derivedFrom(field: "account")
+  balancesSnapshot: [AccountBalanceDailySnapshot!]!
+    @derivedFrom(field: "account")
 }
 
 type AccountBalance @entity {
