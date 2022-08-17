@@ -1,0 +1,311 @@
+# Subgraph Schema: ERC4626 Tokens
+# Version: 1.0.0
+
+###################################
+####### Vault Share Metadata ######
+###################################
+
+type Share @entity {
+  " Smart contract address of the share "
+  id: ID!
+
+  " Name of the share, mirrored from the smart contract "
+  name: String!
+
+  " Symbol of the share, mirrored from the smart contract "
+  symbol: String!
+
+  " The number of decimal places this token uses, default to 18 "
+  decimals: Int!
+
+  " Total number of unique share holders who are currently holding more the token "
+  currentHolderCount: BigInt!
+
+  " Total number of cumulative unique share holders who held or are holding the token "
+  cumulativeHolderCount: BigInt!
+
+  " Total number of share transfer events "
+  transferCount: BigInt!
+
+  " Total number of share deposit events "
+  depositCount: BigInt!
+
+  " Total number of share withdraw events "
+  withdrawCount: BigInt!
+
+  " Total token supply "
+  totalSupply: BigDecimal!
+
+  " Total share burned "
+  totalDeposited: BigInt!
+
+  " Total share withdrawed "
+  totalWithdrawed: BigInt!
+
+  " List of token transfers "
+  transfers: [TransferEvent!]! @derivedFrom(field: "share")
+
+  " List of share deposits "
+  transfers: [DepositEvent!]! @derivedFrom(field: "share")
+
+  " List of token withdraws "
+  transfers: [WithdrawEvent!]! @derivedFrom(field: "share")
+
+  " Share holder's balance "
+  holdersBalance: [AccountBalance!]! @derivedFrom(field: "share")
+
+  ##### Snapshots #####
+
+  " Daily snapshot for this share "
+  dailyShareSnapshot: [ShareDailySnapshot!]! @derivedFrom(field: "share")
+}
+
+###############################
+####### Vault Share Timeseries ######
+###############################
+
+type ShareDailySnapshot @entity {
+  " { Share Address }-{ # of days since Unix epoch time } "
+  id: ID!
+
+  " Share this snapshot is associated with "
+  share: Share!
+
+  " number of accounts holding the share "
+  currentHolderCount: BigInt!
+
+  " number of cumulative unique holders "
+  cumulativeHolderCount: BigInt!
+
+  " Total number of events occurred in a day "
+  dailyEventCount: Int!
+
+  " Total number of transfers in a day "
+  dailyTransferCount: Int!
+
+  " Total number of token transfered in a day "
+  dailyTransferAmount: BigDecimal!
+
+  " Total number of deposits in a day "
+  dailyDepositCount: Int!
+
+  " Total number of share minted in a day "
+  dailyDepositAmount: BigDecimal!
+
+  " Total number of withdraws in a day "
+  dailyWithdrawCount: Int!
+
+  " Total number of token withdrawed in a day "
+  dailyWithdrawAmount: BigDecimal!
+
+  " Block number of this snapshot "
+  blockNumber: BigInt!
+
+  " Timestamp of this snapshot "
+  timestamp: BigInt!
+}
+
+##################################
+##### Event-Level Data #####
+##################################
+
+interface Event {
+  " { Token ID }-{ Transaction hash }-{ Log index } "
+  id: ID!
+
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+
+  " The token this event belongs to "
+  token: Token!
+
+  " Nonce of the transaction that emitted this event "
+  nonce: Int!
+
+  " Address that received the tokens "
+  to: Account!
+
+  " Address that sent the tokens "
+  from: Account!
+
+  " Block number of this event "
+  blockNumber: BigInt!
+
+  " Timestamp of this event "
+  timestamp: BigInt!
+}
+
+type TransferEvent implements Event @entity {
+  " { Token ID }-{ Transaction hash }-{ Log index } "
+  id: ID!
+
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+
+  " The token this event belongs to "
+  token: Token!
+
+  " Nonce of the transaction that emitted this event "
+  nonce: Int!
+
+  " Quantity of tokens transferred "
+  amount: BigDecimal!
+
+  " Account that received the tokens "
+  to: Account!
+
+  " Account that sent the tokens "
+  from: Account!
+
+  " Block number of this event "
+  blockNumber: BigInt!
+
+  " Timestamp of this event "
+  timestamp: BigInt!
+}
+
+type DepositEvent implements Event @entity {
+  " { Token ID }-{ Transaction hash }-{ Log index } "
+  id: ID!
+
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+
+  " The token this event belongs to "
+  token: Token!
+
+  " Nonce of the transaction that emitted this event "
+  nonce: Int!
+
+  " Account that exchanged the assets for shares "
+  sender: Account!
+
+  " Account that received the shares "
+  owner: Account!
+
+  " Quantity of assets deposited "
+  assetsAmount: BigInt!
+
+  " Quantity of shares received "
+  sharesAmount: BigDecimal!
+
+  " Block number of this event "
+  blockNumber: BigInt!
+
+  " Timestamp of this event "
+  timestamp: BigInt!
+}
+
+type WithdrawEvent implements Event @entity {
+  " { Token ID }-{ Transaction hash }-{ Log index } "
+  id: ID!
+
+  " Transaction hash of the transaction that emitted this event "
+  hash: String!
+
+  " Event log index. For transactions that don't emit event, create arbitrary index starting from 0 "
+  logIndex: Int!
+
+  " The token this event belongs to "
+  token: Token!
+
+  " Nonce of the transaction that emitted this event "
+  nonce: Int!
+
+  " Account that initiated the event "
+  sender: Account!
+
+  " Account that received the assets for shares "
+  receiver: Account!
+
+  " Account that owned the shares "
+  owner: Account!
+
+  " Quantity of assets received "
+  assetsAmount: BigInt!
+
+  " Quantity of shares exchanged "
+  sharesAmount: BigDecimal!
+
+  " Block number of this event "
+  blockNumber: BigInt!
+
+  " Timestamp of this event "
+  timestamp: BigInt!
+}
+
+##################################
+######## Account MetaData ########
+##################################
+
+# An account is a unique Ethereum address
+type Account @entity {
+  " Address of the account "
+  id: ID!
+
+  " Token transfers to this account "
+  transferTo: [TransferEvent!]! @derivedFrom(field: "to")
+
+  " Token transfers from this account "
+  transferFrom: [TransferEvent!]! @derivedFrom(field: "from")
+
+  " Token balances that this account holds "
+  balances: [AccountBalance!]! @derivedFrom(field: "account")
+
+  " Token balances snapshot that this account holds "
+  balancesSnapshot: [AccountBalanceDailySnapshot!]!
+    @derivedFrom(field: "account")
+}
+
+type AccountBalance @entity {
+  " { Address Of the Account }-{ Address of the Token }"
+  id: ID!
+
+  " Account address "
+  account: Account!
+
+  " Share address "
+  token: Token!
+
+  " Current account balance "
+  amount: BigDecimal!
+
+  " Block number in which the balance was last modified "
+  blockNumber: BigInt!
+
+  " Timestamp in which the balance was last modified "
+  timestamp: BigInt!
+}
+
+###############################
+###### Account Timeseries #####
+###############################
+
+type AccountBalanceDailySnapshot @entity {
+  " { Address Of the Account }-{ Address of the Share }-{ # of days since Unix epoch time } "
+  id: ID!
+
+  " Account address "
+  account: Account!
+
+  " Share address "
+  share: Share!
+
+  " Current account balance "
+  amount: BigDecimal!
+
+  " Block number in which the balance was last modified "
+  blockNumber: BigInt!
+
+  " Timestamp in which the balance was last modified "
+  timestamp: BigInt!
+}
