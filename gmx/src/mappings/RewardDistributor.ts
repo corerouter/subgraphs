@@ -5,7 +5,7 @@ import {
 } from "../../generated/FeeGlpRewardDistributor/RewardDistributor";
 import { getOrCreateToken, getOrCreateRewardToken } from "../entities/token";
 import { updatePoolRewardToken } from "../entities/pool";
-import { updateSnapshots } from "../entities/snapshot";
+import { takeSnapshots } from "../entities/snapshots";
 import { convertTokenToDecimal } from "../utils/numbers";
 import { SECONDS_PER_DAY } from "../utils/constants";
 
@@ -18,7 +18,7 @@ export function handleEsgmxToGlpChange(event: TokensPerIntervalChange): void {
 }
 
 function handleTokensPerIntervalChange(event: TokensPerIntervalChange): void {
-  updateSnapshots(event);
+  takeSnapshots(event);
 
   const rewardDistributorContract = RewardDistributor.bind(event.address);
   const tryRewardToken = rewardDistributorContract.try_rewardToken();

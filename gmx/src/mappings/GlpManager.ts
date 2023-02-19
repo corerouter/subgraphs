@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import {
   AddLiquidity,
   RemoveLiquidity,
@@ -15,10 +15,9 @@ import {
   getOrCreateAccount,
   incrementAccountEventCount,
 } from "../entities/account";
-import { updateTempUsageMetrics } from "../entities/usage";
-import { updateSnapshots } from "../entities/snapshot";
+import { takeSnapshots, updateTempUsageMetrics } from "../entities/snapshots";
 import { convertTokenToDecimal } from "../utils/numbers";
-import { DEFAULT_DECIMALS, INT_ZERO } from "../utils/constants";
+import { BIGINT_ZERO, DEFAULT_DECIMALS, INT_ZERO } from "../utils/constants";
 
 export function handleAddLiquidity(event: AddLiquidity): void {
   handleUpdateLiquidityEvent(
@@ -59,11 +58,14 @@ function handleUpdateLiquidityEvent(
   aumInUsdg: BigInt,
   eventType: EventType
 ): void {
-  updateSnapshots(event);
+  takeSnapshots(event);
 
   const account = getOrCreateAccount(event, accountAddress);
-  const pool = getOrCreateLiquidityPool(event);
+  incrementAccountEventCount(event, account, eventType, BIGINT_ZERO);
+  incrementProtocolEventCount(event, eventType, BIGINT_ZERO);
 
+  const pool = getOrCreateLiquidityPool(event);
+  const usdAmount = convertTokenToDecimal(usdgAmount, DEFAULT_DECIMALS);
   if (eventType == EventType.Deposit) {
     if (!pool.outputToken) {
       const glpManagerContract = GlpManager.bind(event.address);
@@ -78,22 +80,19 @@ function handleUpdateLiquidityEvent(
       accountAddress,
       inputTokenAddress,
       inputTokenAmount,
-      convertTokenToDecimal(usdgAmount, DEFAULT_DECIMALS),
+      usdAmount,
       glpAmount
     );
-  } else {
+  } else if (eventType == EventType.Withdraw) {
     createWithdraw(
       event,
       accountAddress,
       inputTokenAddress,
       inputTokenAmount,
-      convertTokenToDecimal(usdgAmount, DEFAULT_DECIMALS),
+      usdAmount,
       glpAmount
     );
   }
-
-  incrementAccountEventCount(event, account, eventType);
-  incrementProtocolEventCount(event, eventType);
 
   updatePoolTvl(
     event,

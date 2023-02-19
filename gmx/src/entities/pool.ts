@@ -8,12 +8,11 @@ import {
 } from "@graphprotocol/graph-ts";
 import {
   LiquidityPool,
-  LiquidityPoolDailySnapshot,
   LiquidityPoolFee,
-  LiquidityPoolHourlySnapshot,
   RewardToken,
   Token,
 } from "../../generated/schema";
+import { Vault } from "../../generated/Vault/Vault";
 import { NetworkConfigs } from "../../configurations/configure";
 import { EventType } from "./event";
 import {
@@ -27,23 +26,26 @@ import {
   increaseProtocolSideRevenue,
   increaseProtocolSupplySideRevenue,
   updateProtocolOpenInterestUSD,
+  incrementProtocolUniqueUsers,
 } from "./protocol";
 import { getOrCreateToken, updateTokenPrice } from "./token";
 import {
   BIGDECIMAL_ZERO,
   INT_ZERO,
   BIGINT_ZERO,
-  SECONDS_PER_DAY,
-  SECONDS_PER_HOUR,
   PositionSide,
   INT_ONE,
-  DEFAULT_DECIMALS,
-  BIGDECIMAL_HUNDRED,
   LiquidityPoolFeeType,
   BIGDECIMAL_THOUSAND,
+  POOL_NAME,
+  POOL_SYMBOL,
+  INT_NEGATIVE_ONE,
 } from "../utils/constants";
-import { convertTokenToDecimal, multiArraySort } from "../utils/numbers";
-import { Vault } from "../../generated/Vault/Vault";
+import {
+  convertTokenToDecimal,
+  multiArraySort,
+  poolArraySort,
+} from "../utils/numbers";
 import { enumToPrefix } from "../utils/strings";
 
 export function getOrCreateLiquidityPool(event: ethereum.Event): LiquidityPool {
@@ -56,8 +58,8 @@ export function getOrCreateLiquidityPool(event: ethereum.Event): LiquidityPool {
 
     // Metadata
     pool.protocol = protocol.id;
-    pool.name = "GMXVault";
-    pool.symbol = "VAULT";
+    pool.name = POOL_NAME;
+    pool.symbol = POOL_SYMBOL;
     pool.createdTimestamp = event.block.timestamp;
     pool.createdBlockNumber = event.block.number;
 
@@ -102,11 +104,20 @@ export function getOrCreateLiquidityPool(event: ethereum.Event): LiquidityPool {
     pool.rewardTokenEmissionsUSD = [];
 
     pool.cumulativeVolumeUSD = BIGDECIMAL_ZERO;
-    pool._cumulativeInflowVolumeUSD = BIGDECIMAL_ZERO;
-    pool._cumulativeClosedInflowVolumeUSD = BIGDECIMAL_ZERO;
-    pool._cumulativeOutflowVolumeUSD = BIGDECIMAL_ZERO;
+    pool._cumulativeVolumeByTokenAmount = [];
+    pool._cumulativeVolumeByTokenUSD = [];
+    pool.cumulativeInflowVolumeUSD = BIGDECIMAL_ZERO;
+    pool._cumulativeInflowVolumeByTokenAmount = [];
+    pool._cumulativeInflowVolumeByTokenUSD = [];
+    pool.cumulativeClosedInflowVolumeUSD = BIGDECIMAL_ZERO;
+    pool._cumulativeClosedInflowVolumeByTokenAmount = [];
+    pool._cumulativeClosedInflowVolumeByTokenUSD = [];
+    pool.cumulativeOutflowVolumeUSD = BIGDECIMAL_ZERO;
+    pool._cumulativeOutflowVolumeByTokenAmount = [];
+    pool._cumulativeOutflowVolumeByTokenUSD = [];
 
-    pool._fundingrate = [];
+    pool.fundingrate = [];
+    pool.cumulativeUniqueUsers = INT_ZERO;
     pool._lastSnapshotDayID = INT_ZERO;
     pool._lastSnapshotHourID = INT_ZERO;
     pool._lastUpdateTimestamp = BIGINT_ZERO;
@@ -121,560 +132,117 @@ export function getOrCreateLiquidityPool(event: ethereum.Event): LiquidityPool {
   return pool;
 }
 
-// export function getOrCreateLiquidityPoolDailySnapshot(
-//   event: ethereum.Event
-// ): LiquidityPoolDailySnapshot {
-//   // Number of days since Unix epoch
-//   const day = event.block.timestamp.toI32() / SECONDS_PER_DAY;
-//   // Create unique id for the day
-//   const dayId = Bytes.fromI32(day);
-//   let poolMetrics = LiquidityPoolDailySnapshot.load(dayId);
-
-//   if (!poolMetrics) {
-//     poolMetrics = new LiquidityPoolDailySnapshot(dayId);
-//     poolMetrics.days = day;
-//     poolMetrics.protocol = getOrCreateProtocol().id;
-//     const pool = getOrCreateLiquidityPool(event);
-//     poolMetrics.pool = pool.id;
-
-//     poolMetrics.totalValueLockedUSD = pool.totalValueLockedUSD;
-
-//     poolMetrics.cumulativeTotalRevenueUSD = pool.cumulativeTotalRevenueUSD;
-//     poolMetrics.cumulativeSupplySideRevenueUSD =
-//       pool.cumulativeSupplySideRevenueUSD;
-//     poolMetrics.cumulativeProtocolSideRevenueUSD =
-//       pool.cumulativeProtocolSideRevenueUSD;
-//     poolMetrics.dailyTotalRevenueUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.dailySupplySideRevenueUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.dailyProtocolSideRevenueUSD = BIGDECIMAL_ZERO;
-
-//     poolMetrics.dailyFundingrate = [];
-//     poolMetrics.dailyEntryPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeEntryPremiumUSD = pool.cumulativeEntryPremiumUSD;
-//     poolMetrics.dailyExitPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeExitPremiumUSD = pool.cumulativeExitPremiumUSD;
-//     poolMetrics.dailyTotalPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeTotalPremiumUSD = pool.cumulativeTotalPremiumUSD;
-//     poolMetrics.dailyDepositPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeDepositPremiumUSD = pool.cumulativeDepositPremiumUSD;
-//     poolMetrics.dailyWithdrawPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeWithdrawPremiumUSD =
-//       pool.cumulativeWithdrawPremiumUSD;
-//     poolMetrics.dailyTotalLiquidityPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeTotalLiquidityPremiumUSD =
-//       pool.cumulativeTotalLiquidityPremiumUSD;
-
-//     poolMetrics.dailyActiveBorrowers = INT_ZERO;
-//     poolMetrics.cumulativeUniqueBorrowers = pool.cumulativeUniqueBorrowers;
-//     poolMetrics.dailyActiveLiquidators = INT_ZERO;
-//     poolMetrics.cumulativeUniqueLiquidators = pool.cumulativeUniqueLiquidators;
-//     poolMetrics.dailyActiveLiquidatees = INT_ZERO;
-//     poolMetrics.cumulativeUniqueLiquidatees = pool.cumulativeUniqueLiquidatees;
-
-//     poolMetrics.dailylongPositionCount = INT_ZERO;
-//     poolMetrics.longPositionCount = pool.longPositionCount;
-//     poolMetrics.dailyshortPositionCount = INT_ZERO;
-//     poolMetrics.shortPositionCount = pool.shortPositionCount;
-//     poolMetrics.dailyopenPositionCount = INT_ZERO;
-//     poolMetrics.openPositionCount = pool.openPositionCount;
-//     poolMetrics.dailyclosedPositionCount = INT_ZERO;
-//     poolMetrics.closedPositionCount = pool.closedPositionCount;
-//     poolMetrics.dailycumulativePositionCount = INT_ZERO;
-//     poolMetrics.cumulativePositionCount = pool.cumulativePositionCount;
-
-//     poolMetrics.dailyVolumeUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.dailyVolumeByTokenAmount = [];
-//     poolMetrics.dailyVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeVolumeUSD = pool.cumulativeVolumeUSD;
-//     poolMetrics.dailyInflowVolumeUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.dailyInflowVolumeByTokenAmount = [];
-//     poolMetrics.dailyInflowVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeInflowVolumeUSD = pool._cumulativeInflowVolumeUSD;
-//     poolMetrics.dailyClosedInflowVolumeUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.dailyClosedInflowVolumeByTokenAmount = [];
-//     poolMetrics.dailyClosedInflowVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeClosedInflowVolumeUSD =
-//       pool._cumulativeClosedInflowVolumeUSD;
-//     poolMetrics.dailyOutflowVolumeUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.dailyOutflowVolumeByTokenAmount = [];
-//     poolMetrics.dailyOutflowVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeOutflowVolumeUSD = pool._cumulativeOutflowVolumeUSD;
-
-//     poolMetrics.inputTokenBalances = pool.inputTokenBalances;
-//     poolMetrics.inputTokenWeights = pool.inputTokenWeights;
-//     poolMetrics.outputTokenSupply = pool.outputTokenSupply;
-//     poolMetrics.outputTokenPriceUSD = pool.outputTokenPriceUSD;
-//     poolMetrics.stakedOutputTokenAmount = pool.stakedOutputTokenAmount;
-//     poolMetrics.rewardTokenEmissionsAmount = pool.rewardTokenEmissionsAmount;
-//     poolMetrics.rewardTokenEmissionsUSD = pool.rewardTokenEmissionsUSD;
-
-//     poolMetrics.save();
-//   }
-
-//   return poolMetrics;
-// }
-
-// export function getOrCreateLiquidityPoolHourlySnapshot(
-//   event: ethereum.Event
-// ): LiquidityPoolHourlySnapshot {
-//   // Number of hours since Unix epoch
-//   const hour = event.block.timestamp.toI32() / SECONDS_PER_HOUR;
-//   // Create unique id for the day
-//   const hourId = Bytes.fromI32(hour);
-//   let poolMetrics = LiquidityPoolHourlySnapshot.load(hourId);
-
-//   if (!poolMetrics) {
-//     poolMetrics = new LiquidityPoolHourlySnapshot(hourId);
-//     poolMetrics.hours = hour;
-//     poolMetrics.protocol = getOrCreateProtocol().id;
-//     const pool = getOrCreateLiquidityPool(event);
-//     poolMetrics.pool = pool.id;
-
-//     poolMetrics.totalValueLockedUSD = pool.totalValueLockedUSD;
-
-//     poolMetrics.cumulativeTotalRevenueUSD = pool.cumulativeTotalRevenueUSD;
-//     poolMetrics.cumulativeSupplySideRevenueUSD =
-//       pool.cumulativeSupplySideRevenueUSD;
-//     poolMetrics.cumulativeProtocolSideRevenueUSD =
-//       pool.cumulativeProtocolSideRevenueUSD;
-//     poolMetrics.hourlyTotalRevenueUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.hourlySupplySideRevenueUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.hourlyProtocolSideRevenueUSD = BIGDECIMAL_ZERO;
-
-//     poolMetrics.hourlyFundingrate = [];
-//     poolMetrics.hourlyEntryPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeEntryPremiumUSD = pool.cumulativeEntryPremiumUSD;
-//     poolMetrics.hourlyExitPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeExitPremiumUSD = pool.cumulativeExitPremiumUSD;
-//     poolMetrics.hourlyTotalPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeTotalPremiumUSD = pool.cumulativeTotalPremiumUSD;
-//     poolMetrics.hourlyDepositPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeDepositPremiumUSD = pool.cumulativeDepositPremiumUSD;
-//     poolMetrics.hourlyWithdrawPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeWithdrawPremiumUSD =
-//       pool.cumulativeWithdrawPremiumUSD;
-//     poolMetrics.hourlyTotalLiquidityPremiumUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.cumulativeTotalLiquidityPremiumUSD =
-//       pool.cumulativeTotalLiquidityPremiumUSD;
-
-//     poolMetrics.hourlyVolumeUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.hourlyVolumeByTokenAmount = [];
-//     poolMetrics.hourlyVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeVolumeUSD = pool.cumulativeVolumeUSD;
-//     poolMetrics.hourlyInflowVolumeByTokenAmount = [];
-//     poolMetrics.hourlyInflowVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeInflowVolumeUSD = pool._cumulativeInflowVolumeUSD;
-//     poolMetrics.hourlyClosedInflowVolumeUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.hourlyClosedInflowVolumeByTokenAmount = [];
-//     poolMetrics.hourlyClosedInflowVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeClosedInflowVolumeUSD =
-//       pool._cumulativeClosedInflowVolumeUSD;
-//     poolMetrics.hourlyOutflowVolumeUSD = BIGDECIMAL_ZERO;
-//     poolMetrics.hourlyOutflowVolumeByTokenAmount = [];
-//     poolMetrics.hourlyOutflowVolumeByTokenUSD = [];
-//     poolMetrics.cumulativeOutflowVolumeUSD = pool._cumulativeOutflowVolumeUSD;
-
-//     poolMetrics.inputTokenBalances = pool.inputTokenBalances;
-//     poolMetrics.inputTokenWeights = pool.inputTokenWeights;
-//     poolMetrics.outputTokenSupply = pool.outputTokenSupply;
-//     poolMetrics.outputTokenPriceUSD = pool.outputTokenPriceUSD;
-//     poolMetrics.stakedOutputTokenAmount = pool.stakedOutputTokenAmount;
-//     poolMetrics.rewardTokenEmissionsAmount = pool.rewardTokenEmissionsAmount;
-//     poolMetrics.rewardTokenEmissionsUSD = pool.rewardTokenEmissionsUSD;
-
-//     poolMetrics.save();
-//   }
-
-//   return poolMetrics;
-// }
-
-export function updateLiquidityPoolDailySnapshot(
-  pool: LiquidityPool,
-  day: i32
-): void {
-  const id = pool.id.concatI32(day);
-
-  // log.error(
-  //   "update daily pool snapshot at day {} while _lastSnapshotDayID is {} ",
-  //   [day.toString(), pool._lastSnapshotDayID.toString()]
-  // );
-
-  if (LiquidityPoolDailySnapshot.load(id)) {
-    return;
-  }
-  const poolMetrics = new LiquidityPoolDailySnapshot(id);
-  const prevPoolMetrics = LiquidityPoolDailySnapshot.load(
-    pool.id.concatI32(pool._lastSnapshotDayID)
-  );
-
-  let prevCumulativeVolumeUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeSupplySideRevenueUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeProtocolSideRevenueUSD = BIGDECIMAL_ZERO;
-
-  let prevCumulativeEntryPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeExitPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeTotalPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeDepositPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeWithdrawPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeTotalLiquidityPremiumUSD = BIGDECIMAL_ZERO;
-
-  let prevCumulativeInflowVolumeUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeClosedInflowVolumeUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeOutflowVolumeUSD = BIGDECIMAL_ZERO;
-
-  let prevCumulativeUniqueBorrowers = INT_ZERO;
-  let prevCumulativeUniqueLiquidators = INT_ZERO;
-  let prevCumulativeUniqueLiquidatees = INT_ZERO;
-
-  let prevLongPositionCount = INT_ZERO;
-  let prevShortPositionCount = INT_ZERO;
-  let prevOpenPositionCount = INT_ZERO;
-  let prevClosedPositionCount = INT_ZERO;
-  let prevCumulativePositionCount = INT_ZERO;
-  let prevCumulativeTotalRevenueUSD = BIGDECIMAL_ZERO;
-
-  if (prevPoolMetrics != null) {
-    prevCumulativeVolumeUSD = prevPoolMetrics.cumulativeVolumeUSD;
-    prevCumulativeSupplySideRevenueUSD =
-      prevPoolMetrics.cumulativeSupplySideRevenueUSD;
-    prevCumulativeProtocolSideRevenueUSD =
-      prevPoolMetrics.cumulativeProtocolSideRevenueUSD;
-    prevCumulativeTotalRevenueUSD = prevPoolMetrics.cumulativeTotalRevenueUSD;
-
-    prevCumulativeEntryPremiumUSD = prevPoolMetrics.cumulativeEntryPremiumUSD;
-    prevCumulativeExitPremiumUSD = prevPoolMetrics.cumulativeExitPremiumUSD;
-    prevCumulativeTotalPremiumUSD = prevPoolMetrics.cumulativeTotalPremiumUSD;
-    prevCumulativeDepositPremiumUSD =
-      prevPoolMetrics.cumulativeDepositPremiumUSD;
-    prevCumulativeWithdrawPremiumUSD =
-      prevPoolMetrics.cumulativeWithdrawPremiumUSD;
-    prevCumulativeTotalLiquidityPremiumUSD =
-      prevPoolMetrics.cumulativeTotalLiquidityPremiumUSD;
-
-    prevCumulativeInflowVolumeUSD = prevPoolMetrics.cumulativeInflowVolumeUSD;
-    prevCumulativeClosedInflowVolumeUSD =
-      prevPoolMetrics.cumulativeClosedInflowVolumeUSD;
-    prevCumulativeOutflowVolumeUSD = prevPoolMetrics.cumulativeOutflowVolumeUSD;
-
-    prevLongPositionCount = prevPoolMetrics.longPositionCount;
-    prevShortPositionCount = prevPoolMetrics.shortPositionCount;
-    prevOpenPositionCount = prevPoolMetrics.openPositionCount;
-    prevClosedPositionCount = prevPoolMetrics.closedPositionCount;
-    prevCumulativePositionCount = prevPoolMetrics.cumulativePositionCount;
-  } else if (pool._lastSnapshotDayID > INT_ZERO) {
-    log.error(
-      "Missing daily pool snapshot at ID that has been snapped: Pool {}, ID {} ",
-      [pool.id.toHexString(), pool._lastSnapshotDayID.toString()]
-    );
-  }
-
-  poolMetrics.days = day;
-  poolMetrics.protocol = pool.protocol;
-  poolMetrics.pool = pool.id;
-
-  poolMetrics.totalValueLockedUSD = pool.totalValueLockedUSD;
-  poolMetrics.dailyOpenInterestUSD = pool.openInterestUSD;
-
-  poolMetrics.cumulativeSupplySideRevenueUSD =
-    pool.cumulativeSupplySideRevenueUSD;
-  poolMetrics.dailySupplySideRevenueUSD =
-    pool.cumulativeSupplySideRevenueUSD.minus(
-      prevCumulativeSupplySideRevenueUSD
-    );
-  poolMetrics.cumulativeProtocolSideRevenueUSD =
-    pool.cumulativeProtocolSideRevenueUSD;
-  poolMetrics.dailyProtocolSideRevenueUSD =
-    pool.cumulativeProtocolSideRevenueUSD.minus(
-      prevCumulativeProtocolSideRevenueUSD
-    );
-  poolMetrics.cumulativeTotalRevenueUSD = pool.cumulativeTotalRevenueUSD;
-  poolMetrics.dailyTotalRevenueUSD = pool.cumulativeTotalRevenueUSD.minus(
-    prevCumulativeTotalRevenueUSD
-  );
-
-  poolMetrics.dailyFundingrate = pool._fundingrate;
-  poolMetrics.dailyEntryPremiumUSD = pool.cumulativeEntryPremiumUSD.minus(
-    prevCumulativeEntryPremiumUSD
-  );
-  poolMetrics.cumulativeEntryPremiumUSD = pool.cumulativeEntryPremiumUSD;
-  poolMetrics.dailyExitPremiumUSD = pool.cumulativeExitPremiumUSD.minus(
-    prevCumulativeExitPremiumUSD
-  );
-  poolMetrics.cumulativeExitPremiumUSD = pool.cumulativeExitPremiumUSD;
-  poolMetrics.dailyTotalPremiumUSD = pool.cumulativeTotalPremiumUSD.minus(
-    prevCumulativeTotalPremiumUSD
-  );
-  poolMetrics.cumulativeTotalPremiumUSD = pool.cumulativeTotalPremiumUSD;
-  poolMetrics.dailyDepositPremiumUSD = pool.cumulativeDepositPremiumUSD.minus(
-    prevCumulativeDepositPremiumUSD
-  );
-  poolMetrics.cumulativeDepositPremiumUSD = pool.cumulativeDepositPremiumUSD;
-  poolMetrics.dailyWithdrawPremiumUSD = pool.cumulativeWithdrawPremiumUSD.minus(
-    prevCumulativeWithdrawPremiumUSD
-  );
-  poolMetrics.cumulativeWithdrawPremiumUSD = pool.cumulativeWithdrawPremiumUSD;
-  poolMetrics.dailyTotalLiquidityPremiumUSD =
-    pool.cumulativeTotalLiquidityPremiumUSD.minus(
-      prevCumulativeTotalLiquidityPremiumUSD
-    );
-  poolMetrics.cumulativeTotalLiquidityPremiumUSD =
-    pool.cumulativeTotalLiquidityPremiumUSD;
-
-  poolMetrics.dailyVolumeUSD = pool.cumulativeVolumeUSD.minus(
-    prevCumulativeVolumeUSD
-  );
-  poolMetrics.dailyVolumeByTokenAmount = [];
-  poolMetrics.dailyVolumeByTokenUSD = [];
-  poolMetrics.cumulativeVolumeUSD = pool.cumulativeVolumeUSD;
-  poolMetrics.dailyInflowVolumeUSD = pool._cumulativeInflowVolumeUSD.minus(
-    prevCumulativeInflowVolumeUSD
-  );
-  poolMetrics.dailyInflowVolumeByTokenAmount = [];
-  poolMetrics.dailyInflowVolumeByTokenUSD = [];
-  poolMetrics.cumulativeInflowVolumeUSD = pool._cumulativeInflowVolumeUSD;
-  poolMetrics.dailyClosedInflowVolumeUSD =
-    pool._cumulativeClosedInflowVolumeUSD.minus(
-      prevCumulativeClosedInflowVolumeUSD
-    );
-  poolMetrics.dailyClosedInflowVolumeByTokenAmount = [];
-  poolMetrics.dailyClosedInflowVolumeByTokenUSD = [];
-  poolMetrics.cumulativeClosedInflowVolumeUSD =
-    pool._cumulativeClosedInflowVolumeUSD;
-  poolMetrics.dailyOutflowVolumeUSD = pool._cumulativeOutflowVolumeUSD.minus(
-    prevCumulativeOutflowVolumeUSD
-  );
-  poolMetrics.dailyOutflowVolumeByTokenAmount = [];
-  poolMetrics.dailyOutflowVolumeByTokenUSD = [];
-  poolMetrics.cumulativeOutflowVolumeUSD = pool._cumulativeOutflowVolumeUSD;
-
-  poolMetrics.dailyActiveBorrowers =
-    pool.cumulativeUniqueBorrowers - prevCumulativeUniqueBorrowers;
-  poolMetrics.cumulativeUniqueBorrowers = pool.cumulativeUniqueBorrowers;
-  poolMetrics.dailyActiveLiquidators =
-    pool.cumulativeUniqueLiquidators - prevCumulativeUniqueLiquidators;
-  poolMetrics.cumulativeUniqueLiquidators = pool.cumulativeUniqueLiquidators;
-  poolMetrics.dailyActiveLiquidatees =
-    pool.cumulativeUniqueLiquidatees - prevCumulativeUniqueLiquidatees;
-  poolMetrics.cumulativeUniqueLiquidatees = pool.cumulativeUniqueLiquidatees;
-
-  poolMetrics.dailylongPositionCount =
-    pool.longPositionCount - prevLongPositionCount >= 0
-      ? pool.longPositionCount - prevLongPositionCount
-      : INT_ZERO;
-  poolMetrics.longPositionCount = pool.longPositionCount;
-  poolMetrics.dailyshortPositionCount =
-    pool.shortPositionCount - prevShortPositionCount >= 0
-      ? pool.shortPositionCount - prevShortPositionCount
-      : INT_ZERO;
-  poolMetrics.shortPositionCount = pool.shortPositionCount;
-  poolMetrics.dailyopenPositionCount =
-    pool.openPositionCount - prevOpenPositionCount >= 0
-      ? pool.openPositionCount - prevOpenPositionCount
-      : INT_ZERO;
-  poolMetrics.openPositionCount = pool.openPositionCount;
-  poolMetrics.dailyclosedPositionCount =
-    pool.closedPositionCount - prevClosedPositionCount >= 0
-      ? pool.closedPositionCount - prevClosedPositionCount
-      : INT_ZERO;
-  poolMetrics.closedPositionCount = pool.closedPositionCount;
-  poolMetrics.dailycumulativePositionCount =
-    pool.cumulativePositionCount - prevCumulativePositionCount >= 0
-      ? pool.cumulativePositionCount - prevCumulativePositionCount
-      : INT_ZERO;
-  poolMetrics.cumulativePositionCount = pool.cumulativePositionCount;
-
-  poolMetrics.inputTokenBalances = pool.inputTokenBalances;
-  poolMetrics.inputTokenWeights = pool.inputTokenWeights;
-  poolMetrics.outputTokenSupply = pool.outputTokenSupply;
-  poolMetrics.outputTokenPriceUSD = pool.outputTokenPriceUSD;
-  poolMetrics.stakedOutputTokenAmount = pool.stakedOutputTokenAmount;
-  poolMetrics.rewardTokenEmissionsAmount = pool.rewardTokenEmissionsAmount;
-  poolMetrics.rewardTokenEmissionsUSD = pool.rewardTokenEmissionsUSD;
-
-  poolMetrics.save();
-}
-
-export function updateLiquidityPoolHourlySnapshot(
-  pool: LiquidityPool,
-  hour: i32
-): void {
-  const id = pool.id.concatI32(hour);
-  // log.error(
-  //   "update hourly pool snapshot at ID {} while _lastSnapshotHourID is {} ",
-  //   [hour.toString(), pool._lastSnapshotHourID.toString()]
-  // );
-
-  if (LiquidityPoolHourlySnapshot.load(id)) {
-    return;
-  }
-  const poolMetrics = new LiquidityPoolHourlySnapshot(id);
-  const prevPoolMetrics = LiquidityPoolHourlySnapshot.load(
-    pool.id.concatI32(pool._lastSnapshotHourID)
-  );
-
-  let prevCumulativeVolumeUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeSupplySideRevenueUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeProtocolSideRevenueUSD = BIGDECIMAL_ZERO;
-
-  let prevCumulativeEntryPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeExitPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeTotalPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeDepositPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeWithdrawPremiumUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeTotalLiquidityPremiumUSD = BIGDECIMAL_ZERO;
-
-  let prevCumulativeInflowVolumeUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeClosedInflowVolumeUSD = BIGDECIMAL_ZERO;
-  let prevCumulativeOutflowVolumeUSD = BIGDECIMAL_ZERO;
-
-  let prevCumulativeTotalRevenueUSD = BIGDECIMAL_ZERO;
-
-  if (prevPoolMetrics != null) {
-    prevCumulativeVolumeUSD = prevPoolMetrics.cumulativeVolumeUSD;
-    prevCumulativeSupplySideRevenueUSD =
-      prevPoolMetrics.cumulativeSupplySideRevenueUSD;
-    prevCumulativeProtocolSideRevenueUSD =
-      prevPoolMetrics.cumulativeProtocolSideRevenueUSD;
-    prevCumulativeTotalRevenueUSD = prevPoolMetrics.cumulativeTotalRevenueUSD;
-
-    prevCumulativeEntryPremiumUSD = prevPoolMetrics.cumulativeEntryPremiumUSD;
-    prevCumulativeExitPremiumUSD = prevPoolMetrics.cumulativeExitPremiumUSD;
-    prevCumulativeTotalPremiumUSD = prevPoolMetrics.cumulativeTotalPremiumUSD;
-    prevCumulativeDepositPremiumUSD =
-      prevPoolMetrics.cumulativeDepositPremiumUSD;
-    prevCumulativeWithdrawPremiumUSD =
-      prevPoolMetrics.cumulativeWithdrawPremiumUSD;
-    prevCumulativeTotalLiquidityPremiumUSD =
-      prevPoolMetrics.cumulativeTotalLiquidityPremiumUSD;
-
-    prevCumulativeInflowVolumeUSD = prevPoolMetrics.cumulativeInflowVolumeUSD;
-    prevCumulativeClosedInflowVolumeUSD =
-      prevPoolMetrics.cumulativeClosedInflowVolumeUSD;
-    prevCumulativeOutflowVolumeUSD = prevPoolMetrics.cumulativeOutflowVolumeUSD;
-  } else if (pool._lastSnapshotHourID > INT_ZERO) {
-    log.error(
-      "Missing hourly pool snapshot at ID that has been snapped: Pool {}, ID {} ",
-      [pool.id.toHexString(), pool._lastSnapshotHourID.toString()]
-    );
-  }
-
-  poolMetrics.hours = hour;
-  poolMetrics.protocol = pool.protocol;
-  poolMetrics.pool = pool.id;
-
-  poolMetrics.totalValueLockedUSD = pool.totalValueLockedUSD;
-  poolMetrics.hourlyOpenInterestUSD = pool.openInterestUSD;
-
-  poolMetrics.cumulativeSupplySideRevenueUSD =
-    pool.cumulativeSupplySideRevenueUSD;
-  poolMetrics.hourlySupplySideRevenueUSD =
-    pool.cumulativeSupplySideRevenueUSD.minus(
-      prevCumulativeSupplySideRevenueUSD
-    );
-  poolMetrics.cumulativeProtocolSideRevenueUSD =
-    pool.cumulativeProtocolSideRevenueUSD;
-  poolMetrics.hourlyProtocolSideRevenueUSD =
-    pool.cumulativeProtocolSideRevenueUSD.minus(
-      prevCumulativeProtocolSideRevenueUSD
-    );
-  poolMetrics.cumulativeTotalRevenueUSD = pool.cumulativeTotalRevenueUSD;
-  poolMetrics.hourlyTotalRevenueUSD = pool.cumulativeTotalRevenueUSD.minus(
-    prevCumulativeTotalRevenueUSD
-  );
-
-  poolMetrics.hourlyFundingrate = pool._fundingrate;
-  poolMetrics.hourlyEntryPremiumUSD = pool.cumulativeEntryPremiumUSD.minus(
-    prevCumulativeEntryPremiumUSD
-  );
-  poolMetrics.cumulativeEntryPremiumUSD = pool.cumulativeEntryPremiumUSD;
-  poolMetrics.hourlyExitPremiumUSD = pool.cumulativeExitPremiumUSD.minus(
-    prevCumulativeExitPremiumUSD
-  );
-  poolMetrics.cumulativeExitPremiumUSD = pool.cumulativeExitPremiumUSD;
-  poolMetrics.hourlyTotalPremiumUSD = pool.cumulativeTotalPremiumUSD.minus(
-    prevCumulativeTotalPremiumUSD
-  );
-  poolMetrics.cumulativeTotalPremiumUSD = pool.cumulativeTotalPremiumUSD;
-  poolMetrics.hourlyDepositPremiumUSD = pool.cumulativeDepositPremiumUSD.minus(
-    prevCumulativeDepositPremiumUSD
-  );
-  poolMetrics.cumulativeDepositPremiumUSD = pool.cumulativeDepositPremiumUSD;
-  poolMetrics.hourlyWithdrawPremiumUSD =
-    pool.cumulativeWithdrawPremiumUSD.minus(prevCumulativeWithdrawPremiumUSD);
-  poolMetrics.cumulativeWithdrawPremiumUSD = pool.cumulativeWithdrawPremiumUSD;
-  poolMetrics.hourlyTotalLiquidityPremiumUSD =
-    pool.cumulativeTotalLiquidityPremiumUSD.minus(
-      prevCumulativeTotalLiquidityPremiumUSD
-    );
-  poolMetrics.cumulativeTotalLiquidityPremiumUSD =
-    pool.cumulativeTotalLiquidityPremiumUSD;
-
-  poolMetrics.hourlyVolumeUSD = pool.cumulativeVolumeUSD.minus(
-    prevCumulativeVolumeUSD
-  );
-  poolMetrics.hourlyVolumeByTokenAmount = [];
-  poolMetrics.hourlyVolumeByTokenUSD = [];
-  poolMetrics.cumulativeVolumeUSD = pool.cumulativeVolumeUSD;
-  poolMetrics.hourlyInflowVolumeUSD = pool._cumulativeInflowVolumeUSD.minus(
-    prevCumulativeInflowVolumeUSD
-  );
-  poolMetrics.hourlyInflowVolumeByTokenAmount = [];
-  poolMetrics.hourlyInflowVolumeByTokenUSD = [];
-  poolMetrics.cumulativeInflowVolumeUSD = pool._cumulativeInflowVolumeUSD;
-  poolMetrics.hourlyClosedInflowVolumeUSD =
-    pool._cumulativeClosedInflowVolumeUSD.minus(
-      prevCumulativeClosedInflowVolumeUSD
-    );
-  poolMetrics.hourlyClosedInflowVolumeByTokenAmount = [];
-  poolMetrics.hourlyClosedInflowVolumeByTokenUSD = [];
-  poolMetrics.cumulativeClosedInflowVolumeUSD =
-    pool._cumulativeClosedInflowVolumeUSD;
-  poolMetrics.hourlyOutflowVolumeUSD = pool._cumulativeOutflowVolumeUSD.minus(
-    prevCumulativeOutflowVolumeUSD
-  );
-  poolMetrics.hourlyOutflowVolumeByTokenAmount = [];
-  poolMetrics.hourlyOutflowVolumeByTokenUSD = [];
-  poolMetrics.cumulativeOutflowVolumeUSD = pool._cumulativeOutflowVolumeUSD;
-
-  poolMetrics.inputTokenBalances = pool.inputTokenBalances;
-  poolMetrics.inputTokenWeights = pool.inputTokenWeights;
-  poolMetrics.outputTokenSupply = pool.outputTokenSupply;
-  poolMetrics.outputTokenPriceUSD = pool.outputTokenPriceUSD;
-  poolMetrics.stakedOutputTokenAmount = pool.stakedOutputTokenAmount;
-  poolMetrics.rewardTokenEmissionsAmount = pool.rewardTokenEmissionsAmount;
-  poolMetrics.rewardTokenEmissionsUSD = pool.rewardTokenEmissionsUSD;
-
-  poolMetrics.save();
-}
-
 export function increasePoolVolume(
   event: ethereum.Event,
   pool: LiquidityPool,
-  amountUSD: BigDecimal,
+  sizeUSDDelta: BigDecimal,
+  collateralTokenAddress: Address | null,
+  collateralTokenAmountDelta: BigInt,
+  collateralUSDDelta: BigDecimal,
   eventType: EventType
 ): void {
+  let collateralTokenIndex = INT_NEGATIVE_ONE;
+  if (collateralTokenAddress) {
+    collateralTokenIndex = pool.inputTokens.indexOf(collateralTokenAddress);
+  }
+
   switch (eventType) {
     case EventType.CollateralIn:
-      pool._cumulativeInflowVolumeUSD =
-        pool._cumulativeInflowVolumeUSD.plus(amountUSD);
+      pool.cumulativeInflowVolumeUSD =
+        pool.cumulativeInflowVolumeUSD.plus(collateralUSDDelta);
+      pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(sizeUSDDelta);
+
+      const cumulativeInflowVolumeByTokenAmount =
+        pool._cumulativeInflowVolumeByTokenAmount;
+      const cumulativeInflowVolumeByTokenUSD =
+        pool._cumulativeInflowVolumeByTokenUSD;
+      if (collateralTokenIndex >= 0) {
+        cumulativeInflowVolumeByTokenAmount[collateralTokenIndex] =
+          cumulativeInflowVolumeByTokenAmount[collateralTokenIndex].plus(
+            collateralTokenAmountDelta
+          );
+        cumulativeInflowVolumeByTokenUSD[collateralTokenIndex] =
+          cumulativeInflowVolumeByTokenUSD[collateralTokenIndex].plus(
+            collateralUSDDelta
+          );
+      }
+      pool._cumulativeInflowVolumeByTokenAmount =
+        cumulativeInflowVolumeByTokenAmount;
+      pool._cumulativeInflowVolumeByTokenUSD = cumulativeInflowVolumeByTokenUSD;
+
       break;
     case EventType.CollateralOut:
-      pool._cumulativeOutflowVolumeUSD =
-        pool._cumulativeOutflowVolumeUSD.plus(amountUSD);
+      pool.cumulativeOutflowVolumeUSD =
+        pool.cumulativeOutflowVolumeUSD.plus(collateralUSDDelta);
+      pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(sizeUSDDelta);
+
+      const cumulativeOutflowVolumeByTokenAmount =
+        pool._cumulativeOutflowVolumeByTokenAmount;
+      const cumulativeOutflowVolumeByTokenUSD =
+        pool._cumulativeOutflowVolumeByTokenUSD;
+      if (collateralTokenIndex >= 0) {
+        cumulativeOutflowVolumeByTokenAmount[collateralTokenIndex] =
+          cumulativeOutflowVolumeByTokenAmount[collateralTokenIndex].plus(
+            collateralTokenAmountDelta
+          );
+        cumulativeOutflowVolumeByTokenUSD[collateralTokenIndex] =
+          cumulativeOutflowVolumeByTokenUSD[collateralTokenIndex].plus(
+            collateralUSDDelta
+          );
+      }
+      pool._cumulativeOutflowVolumeByTokenAmount =
+        cumulativeOutflowVolumeByTokenAmount;
+      pool._cumulativeOutflowVolumeByTokenUSD =
+        cumulativeOutflowVolumeByTokenUSD;
+
       break;
     case EventType.ClosePosition:
-      pool._cumulativeClosedInflowVolumeUSD =
-        pool._cumulativeClosedInflowVolumeUSD.plus(amountUSD);
+    case EventType.Liquidated:
+      pool.cumulativeClosedInflowVolumeUSD =
+        pool.cumulativeClosedInflowVolumeUSD.plus(collateralUSDDelta);
+
+      const cumulativeClosedInflowVolumeByTokenAmount =
+        pool._cumulativeClosedInflowVolumeByTokenAmount;
+      const cumulativeClosedInflowVolumeByTokenUSD =
+        pool._cumulativeClosedInflowVolumeByTokenUSD;
+      if (collateralTokenIndex >= 0) {
+        cumulativeClosedInflowVolumeByTokenAmount[collateralTokenIndex] =
+          cumulativeClosedInflowVolumeByTokenAmount[collateralTokenIndex].plus(
+            collateralTokenAmountDelta
+          );
+        cumulativeClosedInflowVolumeByTokenUSD[collateralTokenIndex] =
+          cumulativeClosedInflowVolumeByTokenUSD[collateralTokenIndex].plus(
+            collateralUSDDelta
+          );
+      }
+      pool._cumulativeClosedInflowVolumeByTokenAmount =
+        cumulativeClosedInflowVolumeByTokenAmount;
+      pool._cumulativeClosedInflowVolumeByTokenUSD =
+        cumulativeClosedInflowVolumeByTokenUSD;
+
       break;
 
     default:
       break;
   }
-  pool.cumulativeVolumeUSD = pool.cumulativeVolumeUSD.plus(amountUSD);
+
+  const cumulativeVolumeByTokenAmount = pool._cumulativeVolumeByTokenAmount;
+  const cumulativeVolumeByTokenUSD = pool._cumulativeVolumeByTokenUSD;
+  if (collateralTokenIndex >= 0) {
+    cumulativeVolumeByTokenAmount[collateralTokenIndex] =
+      cumulativeVolumeByTokenAmount[collateralTokenIndex].plus(
+        collateralTokenAmountDelta
+      );
+    cumulativeVolumeByTokenUSD[collateralTokenIndex] =
+      cumulativeVolumeByTokenUSD[collateralTokenIndex].plus(collateralUSDDelta);
+  }
+  pool._cumulativeVolumeByTokenAmount = cumulativeVolumeByTokenAmount;
+  pool._cumulativeVolumeByTokenUSD = cumulativeVolumeByTokenUSD;
+
   pool._lastUpdateTimestamp = event.block.timestamp;
   pool.save();
 
-  increaseProtocolVolume(event, amountUSD, eventType);
+  increaseProtocolVolume(event, sizeUSDDelta, collateralUSDDelta, eventType);
 }
 
 export function increasePoolPremium(
@@ -802,43 +370,84 @@ export function updatePoolTvl(
 export function updatePoolOpenInterestUSD(
   event: ethereum.Event,
   pool: LiquidityPool,
-  amountChangeUSD: BigDecimal
+  amountChangeUSD: BigDecimal,
+  isIncrease: boolean
 ): void {
-  pool.openInterestUSD = pool.openInterestUSD.plus(amountChangeUSD);
+  if (isIncrease) {
+    pool.openInterestUSD = pool.openInterestUSD.plus(amountChangeUSD);
+  } else {
+    pool.openInterestUSD = pool.openInterestUSD.minus(amountChangeUSD);
+  }
   pool._lastUpdateTimestamp = event.block.timestamp;
   pool.save();
 
   // Protocol
-  updateProtocolOpenInterestUSD(event, amountChangeUSD);
+  updateProtocolOpenInterestUSD(event, amountChangeUSD, isIncrease);
 }
 
 export function updatePoolInputTokenBalance(
   event: ethereum.Event,
   inputToken: Token,
-  inputTokenAmount: BigInt
+  inputTokenAmount: BigInt,
+  isIncrease: boolean
 ): void {
   const pool = getOrCreateLiquidityPool(event);
 
-  let inputTokens = pool.inputTokens;
-  let inputTokenBalances = pool.inputTokenBalances;
-
+  const inputTokens = pool.inputTokens;
+  const inputTokenBalances = pool.inputTokenBalances;
   const inputTokenIndex = inputTokens.indexOf(inputToken.id);
   if (inputTokenIndex >= 0) {
-    inputTokenBalances[inputTokenIndex] =
-      inputTokenBalances[inputTokenIndex].plus(inputTokenAmount);
+    if (isIncrease) {
+      inputTokenBalances[inputTokenIndex] =
+        inputTokenBalances[inputTokenIndex].plus(inputTokenAmount);
+    } else {
+      inputTokenBalances[inputTokenIndex] =
+        inputTokenBalances[inputTokenIndex].minus(inputTokenAmount);
+    }
   } else {
-    let inputTokenWeights = pool.inputTokenWeights;
-    let fundingrates = pool._fundingrate;
-    let tmpInputTokenBalances = new Array<BigInt>(inputTokens.length).fill(
-      BIGINT_ZERO
-    );
+    const inputTokenWeights = pool.inputTokenWeights;
+    const fundingrates = pool.fundingrate;
+    const cumulativeVolumeByTokenAmount = pool._cumulativeVolumeByTokenAmount;
+    const cumulativeVolumeByTokenUSD = pool._cumulativeVolumeByTokenUSD;
+    const cumulativeInflowVolumeByTokenAmount =
+      pool._cumulativeInflowVolumeByTokenAmount;
+    const cumulativeInflowVolumeByTokenUSD =
+      pool._cumulativeInflowVolumeByTokenUSD;
+    const cumulativeClosedInflowVolumeByTokenAmount =
+      pool._cumulativeClosedInflowVolumeByTokenAmount;
+    const cumulativeClosedInflowVolumeByTokenUSD =
+      pool._cumulativeClosedInflowVolumeByTokenUSD;
+    const cumulativeOutflowVolumeByTokenAmount =
+      pool._cumulativeOutflowVolumeByTokenAmount;
+    const cumulativeOutflowVolumeByTokenUSD =
+      pool._cumulativeOutflowVolumeByTokenUSD;
 
     inputTokens.push(inputToken.id);
     inputTokenBalances.push(inputTokenAmount);
     fundingrates.push(BIGDECIMAL_ZERO);
     inputTokenWeights.push(BIGDECIMAL_ZERO);
+    cumulativeVolumeByTokenAmount.push(BIGINT_ZERO);
+    cumulativeVolumeByTokenUSD.push(BIGDECIMAL_ZERO);
+    cumulativeInflowVolumeByTokenAmount.push(BIGINT_ZERO);
+    cumulativeInflowVolumeByTokenUSD.push(BIGDECIMAL_ZERO);
+    cumulativeClosedInflowVolumeByTokenAmount.push(BIGINT_ZERO);
+    cumulativeClosedInflowVolumeByTokenUSD.push(BIGDECIMAL_ZERO);
+    cumulativeOutflowVolumeByTokenAmount.push(BIGINT_ZERO);
+    cumulativeOutflowVolumeByTokenUSD.push(BIGDECIMAL_ZERO);
 
-    multiArraySort(inputTokens, inputTokenBalances, fundingrates);
+    poolArraySort(
+      inputTokens,
+      inputTokenBalances,
+      fundingrates,
+      cumulativeVolumeByTokenAmount,
+      cumulativeVolumeByTokenUSD,
+      cumulativeInflowVolumeByTokenAmount,
+      cumulativeInflowVolumeByTokenUSD,
+      cumulativeClosedInflowVolumeByTokenAmount,
+      cumulativeClosedInflowVolumeByTokenUSD,
+      cumulativeOutflowVolumeByTokenAmount,
+      cumulativeOutflowVolumeByTokenUSD
+    );
 
     const vaultContract = Vault.bind(event.address);
     for (let i = 0; i < inputTokens.length; i++) {
@@ -853,8 +462,20 @@ export function updatePoolInputTokenBalance(
       }
     }
 
-    pool._fundingrate = fundingrates;
     pool.inputTokenWeights = inputTokenWeights;
+    pool.fundingrate = fundingrates;
+    pool._cumulativeVolumeByTokenAmount = cumulativeVolumeByTokenAmount;
+    pool._cumulativeVolumeByTokenUSD = cumulativeVolumeByTokenUSD;
+    pool._cumulativeInflowVolumeByTokenAmount =
+      cumulativeInflowVolumeByTokenAmount;
+    pool._cumulativeInflowVolumeByTokenUSD = cumulativeInflowVolumeByTokenUSD;
+    pool._cumulativeClosedInflowVolumeByTokenAmount =
+      cumulativeClosedInflowVolumeByTokenAmount;
+    pool._cumulativeClosedInflowVolumeByTokenUSD =
+      cumulativeClosedInflowVolumeByTokenUSD;
+    pool._cumulativeOutflowVolumeByTokenAmount =
+      cumulativeOutflowVolumeByTokenAmount;
+    pool._cumulativeOutflowVolumeByTokenUSD = cumulativeOutflowVolumeByTokenUSD;
   }
 
   pool.inputTokens = inputTokens;
@@ -871,9 +492,9 @@ export function updatePoolRewardToken(
   tokensPerDayUSD: BigDecimal
 ): void {
   const pool = getOrCreateLiquidityPool(event);
-  let rewardTokens = pool.rewardTokens!;
-  let rewardTokenEmissionsAmount = pool.rewardTokenEmissionsAmount!;
-  let rewardTokenEmissionsUSD = pool.rewardTokenEmissionsUSD!;
+  const rewardTokens = pool.rewardTokens!;
+  const rewardTokenEmissionsAmount = pool.rewardTokenEmissionsAmount!;
+  const rewardTokenEmissionsUSD = pool.rewardTokenEmissionsUSD!;
 
   const rewardTokenIndex = rewardTokens.indexOf(rewardToken.id);
   if (rewardTokenIndex >= 0) {
@@ -906,13 +527,13 @@ export function updatePoolFundingRate(
   fundingrate: BigDecimal
 ): void {
   const pool = getOrCreateLiquidityPool(event);
-  let fundingTokens = pool.inputTokens;
-  let fundingrates = pool._fundingrate;
+  const fundingTokens = pool.inputTokens;
+  const fundingrates = pool.fundingrate;
   const fundingTokenIndex = fundingTokens.indexOf(fundingToken.id);
   if (fundingTokenIndex >= 0) {
     fundingrates[fundingTokenIndex] = fundingrate;
   }
-  pool._fundingrate = fundingrates;
+  pool.fundingrate = fundingrates;
   pool._lastUpdateTimestamp = event.block.timestamp;
   pool.save();
 }
@@ -957,6 +578,16 @@ export function increasePoolSupplySideRevenue(
 
   // Protocol
   increaseProtocolSupplySideRevenue(event, amountChangeUSD);
+}
+
+export function incrementPoolUniqueUsers(event: ethereum.Event): void {
+  const pool = getOrCreateLiquidityPool(event);
+  pool.cumulativeUniqueUsers += INT_ONE;
+  pool._lastUpdateTimestamp = event.block.timestamp;
+  pool.save();
+
+  // Protocol
+  incrementProtocolUniqueUsers(event);
 }
 
 export function updatePoolSnapshotDayID(

@@ -1,10 +1,4 @@
-import {
-  Address,
-  BigDecimal,
-  BigInt,
-  ethereum,
-  log,
-} from "@graphprotocol/graph-ts";
+import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
 import {
   Swap,
   IncreasePoolAmount,
@@ -13,12 +7,12 @@ import {
   DecreasePosition,
   CollectSwapFees,
   CollectMarginFees,
-  UpdatePosition,
   ClosePosition,
   LiquidatePosition,
   UpdateFundingRate,
 } from "../../generated/Vault/Vault";
 import {
+  createBorrow,
   createCollateralIn,
   createCollateralOut,
   createLiquidate,
@@ -30,12 +24,7 @@ import {
   getOrCreateAccount,
   incrementAccountEventCount,
 } from "../entities/account";
-import {
-  getOrCreateUserPosition,
-  getUserPosition,
-  incrementPositionEventCount,
-  updateUserPosition,
-} from "../entities/position";
+import { getUserPosition, updateUserPosition } from "../entities/position";
 import {
   increaseProtocolStakeSideRevenue,
   incrementProtocolEventCount,
@@ -51,13 +40,11 @@ import {
   updatePoolInputTokenBalance,
   updatePoolFundingRate,
 } from "../entities/pool";
-import { updateTempUsageMetrics } from "../entities/usage";
-import { updateSnapshots } from "../entities/snapshot";
+import { takeSnapshots, updateTempUsageMetrics } from "../entities/snapshots";
 import {
   BIGDECIMAL_ZERO,
   BIGINT_NEGONE,
   BIGINT_ZERO,
-  DEFAULT_DECIMALS,
   FUNDING_PRECISION,
   INT_NEGATIVE_ONE,
   INT_ONE,
@@ -72,82 +59,9 @@ import {
   exponentToBigDecimal,
 } from "../utils/numbers";
 
-// The transfers are either occur as a part of the Mint or Burn event process.
-// The tokens being transferred in these events are the LP tokens from the liquidity pool that emitted this event.
-// export function handleTransfer(event: Transfer): void {
-//   const pool = getLiquidityPool(
-//     event.address.toHexString(),
-//     event.block.number
-//   );
-
-//   // ignore initial transfers for first adds
-//   if (
-//     event.params.to.toHexString() == ZERO_ADDRESS &&
-//     event.params.value.equals(BIGINT_THOUSAND) &&
-//     pool.outputTokenSupply == BIGINT_ZERO
-//   ) {
-//     return;
-//   }
-//   // mints
-//   if (event.params.from.toHexString() == ZERO_ADDRESS) {
-//     handleTransferMint(
-//       event,
-//       pool,
-//       event.params.value,
-//       event.params.to.toHexString()
-//     );
-//   }
-//   // Case where direct send first on native token withdrawls.
-//   // For burns, mint tokens are first transferred to the pool before transferred for burn.
-//   // This gets the EOA that made the burn loaded into the _Transfer.
-
-//   if (event.params.to == event.address) {
-//     handleTransferToPoolBurn(event, event.params.from.toHexString());
-//   }
-//   // burn
-//   if (
-//     event.params.to.toHexString() == ZERO_ADDRESS &&
-//     event.params.from == event.address
-//   ) {
-//     handleTransferBurn(
-//       event,
-//       pool,
-//       event.params.value,
-//       event.params.from.toHexString()
-//     );
-//   }
-// }
-
-// Handle Sync event.
-// Emitted after every Swap, Mint, and Burn event.
-// Gives information about the rebalancing of tokens used to update tvl, balances, and token pricing
-// export function handleSync(event: Sync): void {
-//   updateInputTokenBalances(
-//     event.address.toHexString(),
-//     event.params.reserve0,
-//     event.params.reserve1,
-//     event.block.number
-//   );
-//   updateProtocolAndPoolTvl(event.address.toHexString(), event.block.number);
-// }
-
-// Handle a mint event emitted from a pool contract. Considered a deposit into the given liquidity pool.
-// export function handleMint(event: Mint): void {
-//   createDeposit(event, event.params.amount0, event.params.amount1);
-//   updateUsageMetrics(event, event.params.sender, UsageType.DEPOSIT);
-//   updateFinancials(event);
-//   updatePoolMetrics(event);
-// }
-
-// Handle a burn event emitted from a pool contract. Considered a withdraw into the given liquidity pool.
-// export function handleBurn(event: Burn): void {
-//   createWithdraw(event, event.params.amount0, event.params.amount1);
-//   updateUsageMetrics(event, event.transaction.from, UsageType.WITHDRAW);
-//   updateFinancials(event);
-//   updatePoolMetrics(event);
-// }
-
 export function handleUpdateFundingRate(event: UpdateFundingRate): void {
+  takeSnapshots(event);
+
   const token = getOrCreateToken(event, event.params.token);
   updatePoolFundingRate(
     event,
@@ -155,21 +69,38 @@ export function handleUpdateFundingRate(event: UpdateFundingRate): void {
     event.params.fundingRate.divDecimal(FUNDING_PRECISION)
   );
 }
+
 // Handle a swap event emitted from a vault contract.
 export function handleSwap(event: Swap): void {
-  updateSnapshots(event);
+  takeSnapshots(event);
 
-  getOrCreateAccount(event, event.params.account);
+  const account = getOrCreateAccount(event, event.params.account);
+  incrementAccountEventCount(event, account, EventType.Swap, BIGINT_ZERO);
+  incrementProtocolEventCount(event, EventType.Swap, BIGINT_ZERO);
+
+  const inputToken = getOrCreateToken(event, event.params.tokenIn);
+  const inputTokenAmountUSD = convertTokenToDecimal(
+    event.params.amountIn,
+    inputToken.decimals
+  ).times(inputToken.lastPriceUSD!);
+
+  const outputToken = getOrCreateToken(event, event.params.tokenOut);
+  const outputTokenAmountUSD = convertTokenToDecimal(
+    event.params.amountOutAfterFees,
+    outputToken.decimals
+  ).times(outputToken.lastPriceUSD!);
+
   createSwap(
     event,
     event.params.account,
     event.params.tokenIn,
     event.params.amountIn,
-    BIGDECIMAL_ZERO,
+    inputTokenAmountUSD,
     event.params.tokenOut,
     event.params.amountOutAfterFees,
-    BIGDECIMAL_ZERO
+    outputTokenAmountUSD
   );
+
   updateTempUsageMetrics(
     event,
     event.params.account,
@@ -231,138 +162,77 @@ export function handleUpdatePositionEvent(
   event: ethereum.Event,
   accountAddress: Address,
   collateralTokenAddress: Address,
-  collateralTokenUSDDelta: BigInt,
+  collateralDelta: BigInt,
   indexTokenAddress: Address,
-  indexTokenUSDDelta: BigInt,
+  sizeDelta: BigInt,
   indexTokenPrice: BigInt,
   fee: BigInt,
   isLong: boolean,
   eventType: EventType,
-  liqudateProfitUSD: BigInt
+  liqudateProfit: BigInt
 ): void {
-  updateSnapshots(event);
+  takeSnapshots(event);
 
   const account = getOrCreateAccount(event, accountAddress);
+  incrementAccountEventCount(event, account, eventType, sizeDelta);
+  incrementProtocolEventCount(event, eventType, sizeDelta);
 
-  let positionSide = PositionSide.SHORT;
-  if (isLong) {
-    positionSide = PositionSide.LONG;
-  }
-
-  const pool = getOrCreateLiquidityPool(event);
-  let OpenPositionCount = INT_ZERO;
-  if (eventType == EventType.CollateralIn) {
-    if (
-      !getUserPosition(
-        account,
-        pool,
-        collateralTokenAddress,
-        indexTokenAddress,
-        positionSide
-      )
-    ) {
-      OpenPositionCount = INT_ONE;
-    }
-  }
   const indexToken = getOrCreateToken(event, indexTokenAddress);
   updateTokenPrice(
     event,
     indexToken,
     indexTokenPrice.div(PRICE_PRECISION).toBigDecimal()
   );
+  const sizeUSDDelta = sizeDelta.div(PRICE_PRECISION).toBigDecimal();
   const collateralToken = getOrCreateToken(event, collateralTokenAddress);
+  const collateralUSDDelta = collateralDelta
+    .div(PRICE_PRECISION)
+    .toBigDecimal();
   let collateralTokenAmountDelta = BIGINT_ZERO;
   if (
     collateralToken.lastPriceUSD &&
     collateralToken.lastPriceUSD != BIGDECIMAL_ZERO
   ) {
     collateralTokenAmountDelta = bigDecimalToBigInt(
-      collateralTokenUSDDelta
-        .toBigDecimal()
+      collateralUSDDelta
         .times(exponentToBigDecimal(collateralToken.decimals))
         .div(collateralToken.lastPriceUSD!)
     );
   }
 
+  const pool = getOrCreateLiquidityPool(event);
+  let positionSide = PositionSide.SHORT;
+  if (isLong) {
+    positionSide = PositionSide.LONG;
+  }
+  let OpenPositionCount = INT_ZERO;
+  if (eventType == EventType.CollateralIn) {
+    const existingPosition = getUserPosition(
+      event,
+      account,
+      pool,
+      collateralTokenAddress,
+      indexTokenAddress,
+      positionSide
+    );
+    if (!existingPosition) {
+      OpenPositionCount = INT_ONE;
+    }
+  }
   const position = updateUserPosition(
     event,
     account,
     pool,
     collateralTokenAddress,
-    collateralTokenUSDDelta.div(PRICE_PRECISION).toBigDecimal(),
+    collateralUSDDelta,
     indexTokenAddress,
-    indexTokenUSDDelta.div(PRICE_PRECISION).toBigDecimal(),
+    sizeUSDDelta,
     positionSide,
     eventType
   );
-
-  if (eventType == EventType.CollateralIn) {
-    createCollateralIn(
-      event,
-      accountAddress,
-      collateralTokenAddress,
-      collateralTokenAmountDelta,
-      collateralTokenUSDDelta.div(PRICE_PRECISION).toBigDecimal(),
-      BIGINT_ZERO,
-      position
-    );
-  } else if (eventType == EventType.CollateralOut) {
-    createCollateralOut(
-      event,
-      accountAddress,
-      collateralTokenAddress,
-      collateralTokenAmountDelta,
-      collateralTokenUSDDelta.div(PRICE_PRECISION).toBigDecimal(),
-      BIGINT_ZERO,
-      position
-    );
-  } else if (eventType == EventType.Liquidated) {
-    createLiquidate(
-      event,
-      indexTokenAddress,
-      collateralTokenAmountDelta,
-      collateralTokenUSDDelta.div(PRICE_PRECISION).toBigDecimal(),
-      liqudateProfitUSD.div(PRICE_PRECISION).toBigDecimal(),
-      event.transaction.from,
-      accountAddress,
-      position
-    );
+  if (!position.timestampClosed) {
+    OpenPositionCount = INT_NEGATIVE_ONE;
   }
-
-  incrementAccountEventCount(event, account, eventType);
-  incrementProtocolEventCount(event, eventType);
-  incrementPositionEventCount(position, eventType);
-
-  if (eventType == EventType.CollateralIn) {
-    updatePoolOpenInterestUSD(
-      event,
-      pool,
-      indexTokenUSDDelta.div(PRICE_PRECISION).toBigDecimal()
-    );
-  } else if (
-    eventType == EventType.CollateralOut ||
-    eventType == EventType.Liquidated
-  ) {
-    updatePoolOpenInterestUSD(
-      event,
-      pool,
-      BIGINT_NEGONE.times(indexTokenUSDDelta)
-        .div(PRICE_PRECISION)
-        .toBigDecimal()
-    );
-    if (eventType == EventType.CollateralOut) {
-      if (position && position._timestampClosed > BIGINT_ZERO) {
-        OpenPositionCount = INT_NEGATIVE_ONE;
-      }
-    }
-  }
-
-  increasePoolVolume(
-    event,
-    pool,
-    indexTokenUSDDelta.div(PRICE_PRECISION).toBigDecimal(),
-    eventType
-  );
 
   increasePoolPremium(
     event,
@@ -371,49 +241,145 @@ export function handleUpdatePositionEvent(
     eventType
   );
 
-  if (eventType == EventType.Liquidated) {
-    updateTempUsageMetrics(
-      event,
-      event.transaction.from,
-      EventType.Liquidate,
-      INT_NEGATIVE_ONE,
-      positionSide
-    );
-    updateTempUsageMetrics(
-      event,
-      accountAddress,
-      EventType.Liquidated,
-      INT_NEGATIVE_ONE,
-      positionSide
-    );
-  } else {
-    updateTempUsageMetrics(
-      event,
-      accountAddress,
-      eventType,
-      OpenPositionCount,
-      positionSide
-    );
+  increasePoolVolume(
+    event,
+    pool,
+    sizeUSDDelta,
+    collateralTokenAddress,
+    collateralTokenAmountDelta,
+    collateralUSDDelta,
+    eventType
+  );
+
+  switch (eventType) {
+    case EventType.CollateralIn:
+      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, true);
+
+      createCollateralIn(
+        event,
+        accountAddress,
+        collateralTokenAddress,
+        collateralTokenAmountDelta,
+        collateralUSDDelta,
+        BIGINT_ZERO,
+        position
+      );
+
+      if (sizeUSDDelta > BIGDECIMAL_ZERO) {
+        let indexTokenAmountDelta = BIGINT_ZERO;
+        if (
+          indexToken.lastPriceUSD &&
+          indexToken.lastPriceUSD != BIGDECIMAL_ZERO
+        ) {
+          indexTokenAmountDelta = bigDecimalToBigInt(
+            sizeUSDDelta
+              .times(exponentToBigDecimal(indexToken.decimals))
+              .div(indexToken.lastPriceUSD!)
+          );
+        }
+        createBorrow(
+          event,
+          accountAddress,
+          indexTokenAddress,
+          indexTokenAmountDelta,
+          sizeUSDDelta,
+          position
+        );
+      }
+
+      updateTempUsageMetrics(
+        event,
+        accountAddress,
+        eventType,
+        OpenPositionCount,
+        positionSide
+      );
+      break;
+    case EventType.CollateralOut:
+      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, false);
+
+      createCollateralOut(
+        event,
+        accountAddress,
+        collateralTokenAddress,
+        collateralTokenAmountDelta,
+        collateralUSDDelta,
+        BIGINT_ZERO,
+        position
+      );
+
+      updateTempUsageMetrics(
+        event,
+        accountAddress,
+        eventType,
+        OpenPositionCount,
+        positionSide
+      );
+      break;
+    case EventType.Liquidated:
+      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, false);
+
+      createLiquidate(
+        event,
+        indexTokenAddress,
+        collateralTokenAmountDelta,
+        collateralUSDDelta,
+        liqudateProfit.div(PRICE_PRECISION).toBigDecimal(),
+        event.transaction.from,
+        accountAddress,
+        position
+      );
+
+      const liquidatorAccount = getOrCreateAccount(
+        event,
+        event.transaction.from
+      );
+      incrementAccountEventCount(
+        event,
+        liquidatorAccount,
+        EventType.Liquidate,
+        BIGINT_ZERO
+      );
+
+      updateTempUsageMetrics(
+        event,
+        event.transaction.from,
+        EventType.Liquidate,
+        INT_ZERO,
+        positionSide
+      );
+      updateTempUsageMetrics(
+        event,
+        accountAddress,
+        EventType.Liquidated,
+        INT_NEGATIVE_ONE,
+        positionSide
+      );
+      break;
+
+    default:
+      break;
   }
 }
 
 export function handleClosePosition(event: ClosePosition): void {
-  if (event.params.realisedPnl < BIGINT_ZERO) {
-    updateSnapshots(event);
-    const pool = getOrCreateLiquidityPool(event);
-    increasePoolVolume(
-      event,
-      pool,
-      BIGINT_NEGONE.times(event.params.realisedPnl)
-        .div(PRICE_PRECISION)
-        .toBigDecimal(),
-      EventType.ClosePosition
-    );
+  if (event.params.realisedPnl >= BIGINT_ZERO) {
+    return;
   }
-  // updatePoolOpenInterestUSD(
-  //   event,
-  //   BIGINT_NEGONE.times(event.params.size).div(PRICE_PRECISION).toBigDecimal()
-  // );
+  takeSnapshots(event);
+
+  const pool = getOrCreateLiquidityPool(event);
+  increasePoolVolume(
+    event,
+    pool,
+    BIGDECIMAL_ZERO,
+    null,
+    BIGINT_ZERO,
+    BIGINT_NEGONE.times(event.params.realisedPnl)
+      .div(PRICE_PRECISION)
+      .toBigDecimal(),
+    EventType.ClosePosition
+  );
 }
 
 export function handleCollectSwapFees(event: CollectSwapFees): void {
@@ -438,18 +404,14 @@ function handleChangePoolAmount(
   event: ethereum.Event,
   isIncreasePoolAmount: boolean
 ): void {
-  updateSnapshots(event);
+  takeSnapshots(event);
 
   const inputToken = getOrCreateToken(event, token);
-  if (isIncreasePoolAmount) {
-    updatePoolInputTokenBalance(event, inputToken, amount);
-  } else {
-    updatePoolInputTokenBalance(event, inputToken, amount.times(BIGINT_NEGONE));
-  }
+  updatePoolInputTokenBalance(event, inputToken, amount, isIncreasePoolAmount);
 }
 
 function handleCollectFees(event: ethereum.Event, feeUsd: BigInt): void {
-  updateSnapshots(event);
+  takeSnapshots(event);
 
   const totalFee = feeUsd.div(PRICE_PRECISION).toBigDecimal();
 

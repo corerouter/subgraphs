@@ -2,7 +2,6 @@ import {
   BigInt,
   Address,
   ethereum,
-  log,
   BigDecimal,
   Bytes,
 } from "@graphprotocol/graph-ts";
@@ -10,67 +9,16 @@ import {
   Deposit,
   Withdraw,
   Swap,
-  Token,
   Position,
   CollateralIn,
   CollateralOut,
   Liquidate,
+  Borrow,
 } from "../../generated/schema";
 import { getOrCreateLiquidityPool } from "./pool";
 import { getOrCreateToken } from "./token";
 import { getOrCreateProtocol } from "./protocol";
-import { getOrCreateAccount } from "./account";
-import {
-  BIGINT_ZERO,
-  LiquidityPoolFeeType,
-  DEFAULT_DECIMALS,
-} from "../utils/constants";
-import { convertTokenToDecimal } from "../utils/numbers";
-
-/**
- * Create the fee for a pool depending on the the protocol and network specific fee structure.
- * Specified in the typescript configuration file.
- */
-// export function createPoolFees(
-//   poolAddress: string,
-//   blockNumber: BigInt
-// ): string[] {
-//   // get or create fee entities, set fee types
-//   let poolLpFee = LiquidityPoolFee.load(poolAddress.concat("-lp-fee"));
-//   if (!poolLpFee) {
-//     poolLpFee = new LiquidityPoolFee(poolAddress.concat("-lp-fee"));
-//     poolLpFee.feeType = LiquidityPoolFeeType.FIXED_LP_FEE;
-//   }
-
-//   let poolProtocolFee = LiquidityPoolFee.load(
-//     poolAddress.concat("-protocol-fee")
-//   );
-//   if (!poolProtocolFee) {
-//     poolProtocolFee = new LiquidityPoolFee(poolAddress.concat("-protocol-fee"));
-//     poolProtocolFee.feeType = LiquidityPoolFeeType.FIXED_PROTOCOL_FEE;
-//   }
-
-//   let poolTradingFee = LiquidityPoolFee.load(
-//     poolAddress.concat("-trading-fee")
-//   );
-//   if (!poolTradingFee) {
-//     poolTradingFee = new LiquidityPoolFee(poolAddress.concat("-trading-fee"));
-//     poolTradingFee.feeType = LiquidityPoolFeeType.FIXED_TRADING_FEE;
-//   }
-
-//   // set fees
-
-//   poolLpFee.feePercentage = NetworkConfigs.getLPFeeToOff();
-//   poolProtocolFee.feePercentage = NetworkConfigs.getProtocolFeeToOff();
-
-//   poolTradingFee.feePercentage = NetworkConfigs.getTradeFee(blockNumber);
-
-//   poolLpFee.save();
-//   poolProtocolFee.save();
-//   poolTradingFee.save();
-
-//   return [poolLpFee.id, poolProtocolFee.id, poolTradingFee.id];
-// }
+import { BIGINT_ZERO } from "../utils/constants";
 
 export enum EventType {
   Deposit,
@@ -99,11 +47,11 @@ export function createDeposit(
   const logIndexI32 = event.logIndex.toI32();
   const deposit = new Deposit(transactionHash.concatI32(logIndexI32));
 
-  deposit.hash = transactionHash.toHexString();
+  deposit.hash = transactionHash;
   deposit.logIndex = logIndexI32;
   deposit.protocol = protocol.id;
-  deposit.to = pool.id.toHexString();
-  deposit.from = accountAddress.toHexString();
+  deposit.to = pool.id;
+  deposit.from = accountAddress;
   deposit.account = accountAddress;
   deposit.blockNumber = event.block.number;
   deposit.timestamp = event.block.timestamp;
@@ -141,11 +89,11 @@ export function createWithdraw(
   const logIndexI32 = event.logIndex.toI32();
   const withdrawal = new Withdraw(transactionHash.concatI32(logIndexI32));
 
-  withdrawal.hash = transactionHash.toHexString();
+  withdrawal.hash = transactionHash;
   withdrawal.logIndex = logIndexI32;
   withdrawal.protocol = protocol.id;
-  withdrawal.to = accountAddress.toHexString();
-  withdrawal.from = pool.id.toHexString();
+  withdrawal.to = accountAddress;
+  withdrawal.from = pool.id;
   withdrawal.account = accountAddress;
   withdrawal.blockNumber = event.block.number;
   withdrawal.timestamp = event.block.timestamp;
@@ -169,6 +117,39 @@ export function createWithdraw(
   withdrawal.save();
 }
 
+export function createBorrow(
+  event: ethereum.Event,
+  accountAddress: Address,
+  inputTokenAddress: Address,
+  inputTokenAmount: BigInt,
+  inputTokenAmountUSD: BigDecimal,
+  position: Position
+): void {
+  const pool = getOrCreateLiquidityPool(event);
+  const protocol = getOrCreateProtocol();
+  const transactionHash = event.transaction.hash;
+  const logIndexI32 = event.logIndex.toI32();
+  const borrow = new Borrow(
+    Bytes.fromUTF8("borrow").concat(transactionHash.concatI32(logIndexI32))
+  );
+
+  borrow.hash = transactionHash;
+  borrow.logIndex = logIndexI32;
+  borrow.protocol = protocol.id;
+  borrow.to = pool.id;
+  borrow.from = accountAddress;
+  borrow.account = accountAddress;
+  borrow.position = position.id;
+  borrow.blockNumber = event.block.number;
+  borrow.timestamp = event.block.timestamp;
+  borrow.asset = inputTokenAddress;
+  borrow.amount = inputTokenAmount;
+  borrow.amountUSD = inputTokenAmountUSD;
+  borrow.pool = pool.id;
+
+  borrow.save();
+}
+
 export function createCollateralIn(
   event: ethereum.Event,
   accountAddress: Address,
@@ -185,12 +166,13 @@ export function createCollateralIn(
   const logIndexI32 = event.logIndex.toI32();
   const collateralIn = new CollateralIn(transactionHash.concatI32(logIndexI32));
 
-  collateralIn.hash = transactionHash.toHexString();
+  collateralIn.hash = transactionHash;
   collateralIn.logIndex = logIndexI32;
   collateralIn.protocol = protocol.id;
-  collateralIn.to = pool.id.toHexString();
-  collateralIn.from = accountAddress.toHexString();
+  collateralIn.to = pool.id;
+  collateralIn.from = accountAddress;
   collateralIn.account = accountAddress;
+  collateralIn.position = position.id;
   collateralIn.blockNumber = event.block.number;
   collateralIn.timestamp = event.block.timestamp;
   collateralIn.inputTokens = pool.inputTokens;
@@ -209,8 +191,6 @@ export function createCollateralIn(
   collateralIn.outputTokenAmount = outputTokenAmount;
   collateralIn.amountUSD = inputTokenAmountUSD;
   collateralIn.pool = pool.id;
-
-  collateralIn.position = position.id;
 
   collateralIn.save();
 }
@@ -232,12 +212,13 @@ export function createCollateralOut(
     transactionHash.concatI32(logIndexI32)
   );
 
-  collateralOut.hash = transactionHash.toHexString();
+  collateralOut.hash = transactionHash;
   collateralOut.logIndex = logIndexI32;
   collateralOut.protocol = protocol.id;
-  collateralOut.to = accountAddress.toHexString();
-  collateralOut.from = pool.id.toHexString();
+  collateralOut.to = accountAddress;
+  collateralOut.from = pool.id;
   collateralOut.account = accountAddress;
+  collateralOut.position = position.id;
   collateralOut.blockNumber = event.block.number;
   collateralOut.timestamp = event.block.timestamp;
   collateralOut.inputTokens = pool.inputTokens;
@@ -256,8 +237,6 @@ export function createCollateralOut(
   collateralOut.outputTokenAmount = outputTokenAmount;
   collateralOut.amountUSD = inputTokenAmountUSD;
   collateralOut.pool = pool.id;
-
-  collateralOut.position = position.id;
 
   collateralOut.save();
 }
@@ -278,12 +257,13 @@ export function createLiquidate(
   const logIndexI32 = event.logIndex.toI32();
   const liquidate = new Liquidate(transactionHash.concatI32(logIndexI32));
 
-  liquidate.hash = transactionHash.toHexString();
+  liquidate.hash = transactionHash;
   liquidate.logIndex = logIndexI32;
   liquidate.protocol = protocol.id;
   liquidate.position = position.id;
-  liquidate.to = liquidator.toHexString();
-  liquidate.from = liquidatee.toHexString();
+  liquidate.to = liquidator;
+  liquidate.from = liquidatee;
+  liquidate.account = liquidatee;
   liquidate.blockNumber = event.block.number;
   liquidate.timestamp = event.block.timestamp;
   liquidate.liquidator = liquidator;
@@ -313,18 +293,18 @@ export function createSwap(
   const logIndexI32 = event.logIndex.toI32();
   const swap = new Swap(transactionHash.concatI32(logIndexI32));
 
-  swap.hash = transactionHash.toHexString();
+  swap.hash = transactionHash;
   swap.logIndex = logIndexI32;
   swap.protocol = protocol.id;
-  swap.to = pool.id.toHexString();
-  swap.from = accountAddress.toHexString();
-  swap.account = getOrCreateAccount(event, accountAddress).id;
+  swap.to = pool.id;
+  swap.from = accountAddress;
+  swap.account = accountAddress;
   swap.blockNumber = event.block.number;
   swap.timestamp = event.block.timestamp;
-  swap.tokenIn = getOrCreateToken(event, inputTokenAddress).id;
+  swap.tokenIn = inputTokenAddress;
   swap.amountIn = inputTokenAmount;
   swap.amountInUSD = inputTokenAmountUSD;
-  swap.tokenOut = getOrCreateToken(event, outputTokenAddress).id;
+  swap.tokenOut = outputTokenAddress;
   swap.amountOut = outputTokenAmount;
   swap.amountOutUSD = outputTokenAmountUSD;
   swap.tradingPair = pool.id;

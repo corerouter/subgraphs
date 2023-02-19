@@ -1,10 +1,4 @@
-import {
-  Address,
-  BigDecimal,
-  BigInt,
-  Bytes,
-  ethereum,
-} from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { NetworkConfigs } from "../../configurations/configure";
 import { ERC20 } from "../../generated/GlpManager/ERC20";
 import { Token, RewardToken } from "../../generated/schema";
@@ -12,11 +6,7 @@ import { getUsdPricePerToken } from "../prices";
 import {
   BIGDECIMAL_ZERO,
   RewardTokenType,
-  GLP_SYMBOL,
   PRICE_CACHING_BLOCKS,
-  USDG_SYMBOL,
-  BIGDECIMAL_ONE,
-  ESGMX_SYMBOL,
   INT_ZERO,
 } from "../utils/constants";
 
@@ -38,33 +28,26 @@ export function getOrCreateToken(
   }
 
   // GLP price will be computed elsewhere.
-  if (token.symbol == GLP_SYMBOL) {
+  if (tokenAddress == NetworkConfigs.getGLPAddress()) {
     return token;
   }
 
-  // Optional lastPriceUSD and lastPriceBlockNumber, but used in financialMetrics
   if (
     token.lastPriceUSD &&
-    !token.lastPriceBlockNumber &&
+    token.lastPriceBlockNumber &&
     event.block.number
       .minus(token.lastPriceBlockNumber!)
       .lt(PRICE_CACHING_BLOCKS)
   ) {
     return token;
   }
-  if (token.symbol == USDG_SYMBOL) {
-    // There is not price info from Oracle for some tokens, so not to try to get price for them here.
-    token.lastPriceUSD = BIGDECIMAL_ONE;
-  } else {
-    // esGMX has no price data, so to use GMX price as its price to compute rewards.
-    if (token.symbol == ESGMX_SYMBOL) {
-      tokenAddress = Address.fromBytes(NetworkConfigs.getGMXAddress());
-    }
-    const price = getUsdPricePerToken(tokenAddress);
-    if (!price.reverted) {
-      token.lastPriceUSD = price.usdPrice;
-    }
+
+  // Optional lastPriceUSD and lastPriceBlockNumber, but used in financialMetrics
+  const price = getUsdPricePerToken(tokenAddress, event.block);
+  if (!price.reverted) {
+    token.lastPriceUSD = price.usdPrice;
   }
+
   token.lastPriceBlockNumber = event.block.number;
   token.save();
 

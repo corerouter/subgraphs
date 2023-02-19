@@ -4,9 +4,6 @@ import { BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 ///// Versions /////
 ////////////////////
 
-export const PROTOCOL_SCHEMA_VERSION = "1.0.2";
-export const PROTOCOL_SUBGRAPH_VERSION = "1.0.0";
-export const PROTOCOL_METHODOLOGY_VERSION = "1.0.0";
 export const PROTOCOL_NAME = "GMX";
 export const PROTOCOL_SLUG = "gmx";
 
@@ -109,9 +106,9 @@ export namespace PositionSide {
 //////////////////////////////
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-export const ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+export const ETH_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
-export const UNISWAP_V2_FACTORY = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+export const UNISWAP_V2_FACTORY = "0x5c69bee701ef814a2b6a3edd4b1652cb9cc5aa6f";
 
 export const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 export const USDC_WETH_PAIR = "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc"; // created 10008355
@@ -176,9 +173,8 @@ export const ETH_NAME = "Ether";
 /////////////////////////////
 
 export const PROTOCOL_ID = "GMX";
-export const GLP_SYMBOL = "GLP";
-export const ESGMX_SYMBOL = "esGMX";
-export const USDG_SYMBOL = "USDG";
+export const POOL_NAME = "GMXVault";
+export const POOL_SYMBOL = "VAULT";
 export const PRICE_CACHING_BLOCKS = BigInt.fromI32(7000);
 export const PRICE_PRECISION = BigInt.fromI32(10).pow(30);
 export const PROTOCOL_SIDE_REVENUE_PERCENT = BigDecimal.fromString("0.3");
