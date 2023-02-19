@@ -10,7 +10,10 @@ import {
   MsgExitSwapShareAmountIn,
 } from "./Decoder";
 import * as constants from "../common/constants";
-import { getOrCreateDexAmmProtocol } from "../common/initializer";
+import {
+  getOrCreateDexAmmProtocol,
+  getOrCreateToken,
+} from "../common/initializer";
 import * as utils from "../common/utils";
 import { updateMetrics } from "./Metrics";
 
@@ -78,9 +81,8 @@ export function msgExitPoolHandler(
     if (inputTokenIndex >= 0) {
       const amount = tokenOutMin.amount;
       inputTokenAmounts[inputTokenIndex] = amount;
-      inputTokenBalances[inputTokenIndex] = inputTokenBalances[
-        inputTokenIndex
-      ].minus(amount);
+      inputTokenBalances[inputTokenIndex] =
+        inputTokenBalances[inputTokenIndex].minus(amount);
       if (inputTokenBalances[inputTokenIndex] <= constants.BIGINT_ZERO) {
         nonPositiveBalance = true;
         log.error(
@@ -175,11 +177,42 @@ function exitSwapHandler(
     .times(utils.bigDecimalToBigInt(inputTokenWeights[tokenOutIndex]))
     .div(constants.BIGINT_HUNDRED);
   let nonPositiveBalance = false;
-  for (let i = 0; i < inputTokenAmounts.length; i++) {
-    inputTokenAmounts[i] = tokenOutAmountChange
-      .times(inputTokenBalances[i])
-      .div(inputTokenBalances[tokenOutIndex]);
+
+  const token0 = getOrCreateToken(tokenOutDenom);
+  let lastPrice0 = constants.BIGDECIMAL_ZERO;
+  if (token0.lastPriceUSD) {
+    lastPrice0 = token0.lastPriceUSD!;
   }
+
+  for (let i = 0; i < inputTokenAmounts.length; i++) {
+    const token1 = getOrCreateToken(liquidityPool.inputTokens[i]);
+    let lastPrice1 = constants.BIGDECIMAL_ZERO;
+    if (token1.lastPriceUSD) {
+      lastPrice1 = token1.lastPriceUSD!;
+    }
+
+    if (
+      lastPrice0 != constants.BIGDECIMAL_ZERO &&
+      lastPrice1 != constants.BIGDECIMAL_ZERO
+    ) {
+      inputTokenAmounts[i] = utils.bigDecimalToBigInt(
+        tokenOutAmountChange
+          .toBigDecimal()
+          .times(utils.exponentToBigDecimal(token1.decimals))
+          .div(utils.exponentToBigDecimal(token0.decimals))
+          .times(lastPrice0)
+          .div(lastPrice1)
+      );
+
+      log.warning("exitSwapHandler() compute amout with price ", []);
+    } else {
+      inputTokenAmounts[i] = tokenOutAmountChange
+        .times(inputTokenBalances[i])
+        .div(inputTokenBalances[tokenOutIndex]);
+      log.warning("exitSwapHandler() compute amout with balance ", []);
+    }
+  }
+
   for (let i = 0; i < inputTokenBalances.length; i++) {
     inputTokenBalances[i] = inputTokenBalances[i].minus(inputTokenAmounts[i]);
     if (inputTokenBalances[i] <= constants.BIGINT_ZERO) {
@@ -212,13 +245,18 @@ function exitPoolHandler(
   data: cosmos.TransactionData
 ): void {
   liquidityPool.inputTokenBalances = inputTokenBalances;
-  liquidityPool.outputTokenSupply = liquidityPool.outputTokenSupply!.minus(
-    shareInAmount
-  );
+  liquidityPool.outputTokenSupply =
+    liquidityPool.outputTokenSupply!.minus(shareInAmount);
   liquidityPool.save();
 
   const prevTVL = liquidityPool.totalValueLockedUSD;
-  utils.updatePoolTVL(liquidityPool, data.block);
+  utils.updatePoolTVLDeposit(liquidityPool, data.block);
+
+  log.warning("exitPoolHandler() tvlChange is {} at height {} index {}", [
+    prevTVL.minus(liquidityPool.totalValueLockedUSD).toString(),
+    data.block.header.height.toString(),
+    data.tx.index.toString(),
+  ]);
 
   createWithdrawTransaction(
     sender,

@@ -1,5 +1,5 @@
 import { Protobuf } from "as-proto";
-import { BigDecimal, BigInt, cosmos } from "@graphprotocol/graph-ts";
+import { BigDecimal, BigInt, cosmos, log } from "@graphprotocol/graph-ts";
 import {
   Account,
   Token,
@@ -325,6 +325,26 @@ export function msgCreatePoolHandler(
   initRegistry();
 
   const poolId = getPoolId(data.tx.result.events);
+  log.warning("msgCreatePoolHandler() poolId is {} at height {} index {}", [
+    poolId.toString(),
+    data.block.header.height.toString(),
+    data.tx.index.toString(),
+  ]);
+  if (
+    poolId != BigInt.fromI32(560) ||
+    poolId != BigInt.fromI32(678) ||
+    poolId != BigInt.fromI32(724)
+  ) {
+    return;
+  }
+
+  if (poolId < constants.BIGINT_ZERO) {
+    log.warning("failed to create a new pool at height {} index {}", [
+      data.block.header.height.toString(),
+      data.tx.index.toString(),
+    ]);
+    return;
+  }
   const liquidityPoolId = constants.Protocol.NAME.concat("-").concat(
     poolId.toString()
   );
@@ -391,7 +411,7 @@ export function msgCreatePoolHandler(
   );
   liquidityPool.save();
 
-  utils.updatePoolTVL(liquidityPool, data.block);
+  utils.updatePoolTVLCreatePool(liquidityPool, data.block);
   utils.updateProtocolAfterNewLiquidityPool(liquidityPool.totalValueLockedUSD);
 
   return;
@@ -404,5 +424,5 @@ function getPoolId(events: cosmos.Event[]): BigInt {
     }
   }
 
-  return constants.BIGINT_ZERO;
+  return constants.BIGINT_NEG_ONE;
 }

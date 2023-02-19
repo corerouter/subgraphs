@@ -164,9 +164,8 @@ function swap(
   const inputTokens = liquidityPool.inputTokens;
   const tokenInIndex = inputTokens.indexOf(tokenInDenom);
   if (tokenInIndex >= 0) {
-    inputTokenBalances[tokenInIndex] = inputTokenBalances[tokenInIndex].plus(
-      tokenInAmount
-    );
+    inputTokenBalances[tokenInIndex] =
+      inputTokenBalances[tokenInIndex].plus(tokenInAmount);
     // The input token balance should always be positive, so put a defensive checking here in case something is wrong.
     if (inputTokenBalances[tokenInIndex] <= constants.BIGINT_ZERO) {
       log.error(
@@ -180,9 +179,8 @@ function swap(
 
   const tokenOutIndex = inputTokens.indexOf(tokenOutDenom);
   if (tokenOutIndex >= 0) {
-    inputTokenBalances[tokenOutIndex] = inputTokenBalances[tokenOutIndex].minus(
-      tokenOutAmount
-    );
+    inputTokenBalances[tokenOutIndex] =
+      inputTokenBalances[tokenOutIndex].minus(tokenOutAmount);
     // The input token balance should always be positive, so put a defensive checking here in case something is wrong.
     if (inputTokenBalances[tokenOutIndex] <= constants.BIGINT_ZERO) {
       log.error(
@@ -200,7 +198,7 @@ function swap(
 
   let volumeUSD = constants.BIGDECIMAL_ZERO;
   const prevTVL = liquidityPool.totalValueLockedUSD;
-  const hasPriceData = utils.updatePoolTVL(liquidityPool, block);
+  const hasPriceData = utils.updatePoolTVLForSwap(liquidityPool, block);
   if (hasPriceData) {
     volumeUSD = updatePriceForSwap(
       liquidityPoolId,
@@ -210,9 +208,14 @@ function swap(
       tokenOutAmount,
       block.header
     );
-    liquidityPool.cumulativeVolumeUSD = liquidityPool.cumulativeVolumeUSD.plus(
-      volumeUSD
-    );
+
+    log.warning("Swap() volumeUSD is {} at height {}", [
+      volumeUSD.toString(),
+      block.header.height.toString(),
+    ]);
+
+    liquidityPool.cumulativeVolumeUSD =
+      liquidityPool.cumulativeVolumeUSD.plus(volumeUSD);
     liquidityPool.save();
   }
   const sender = data.getAttributeValue("sender");
@@ -245,6 +248,11 @@ function swap(
   utils.updateProtocolTotalValueLockedUSD(
     liquidityPool.totalValueLockedUSD.minus(prevTVL)
   );
+
+  log.warning("Swap() tvlChange is {} at height {}", [
+    liquidityPool.totalValueLockedUSD.minus(prevTVL).toString(),
+    block.header.height.toString(),
+  ]);
   updateSupplySideRevenue(liquidityPoolId, volumeUSD, block);
   updateSnapshotsVolume(liquidityPoolId, volumeUSD, block);
   updateMetrics(block, sender, constants.UsageType.SWAP);
