@@ -1,10 +1,4 @@
-import {
-  ethereum,
-  Bytes,
-  Address,
-  BigDecimal,
-  log,
-} from "@graphprotocol/graph-ts";
+import { ethereum, Bytes, Address } from "@graphprotocol/graph-ts";
 import {
   Account,
   LiquidityPool,
@@ -12,6 +6,8 @@ import {
   PositionSnapshot,
   _PositionCounter,
 } from "../../generated/schema";
+import { Vault } from "../../generated/Vault/Vault";
+import { NetworkConfigs } from "../../configurations/configure";
 import {
   decrementAccountOpenPositionCount,
   incrementAccountOpenPositionCount,
@@ -25,15 +21,12 @@ import { getOrCreateToken } from "./token";
 import {
   BIGDECIMAL_ZERO,
   BIGINT_ZERO,
-  FUNDING_PRECISION,
   INT_ONE,
   INT_ZERO,
   PositionSide,
   PRICE_PRECISION,
 } from "../utils/constants";
 import { bigDecimalToBigInt, exponentToBigDecimal } from "../utils/numbers";
-import { Vault } from "../../generated/Vault/Vault";
-import { NetworkConfigs } from "../../configurations/configure";
 
 export function getUserPosition(
   event: ethereum.Event,
@@ -136,9 +129,7 @@ export function updateUserPosition(
   account: Account,
   pool: LiquidityPool,
   collateralTokenAddress: Address,
-  collateralTokenAmountUSD: BigDecimal,
   indexTokenAddress: Address,
-  indexTokenAmountUSD: BigDecimal,
   positionSide: string,
   eventType: EventType
 ): Position {
@@ -153,81 +144,73 @@ export function updateUserPosition(
 
   switch (eventType) {
     case EventType.CollateralIn:
-      position.balanceUSD = position.balanceUSD.plus(indexTokenAmountUSD);
-      position.collateralBalanceUSD = position.collateralBalanceUSD.plus(
-        collateralTokenAmountUSD
-      );
       position.collateralInCount += INT_ONE;
-
       break;
     case EventType.CollateralOut:
-      position.balanceUSD = position.balanceUSD.minus(indexTokenAmountUSD);
-      position.collateralBalanceUSD = position.collateralBalanceUSD.minus(
-        collateralTokenAmountUSD
-      );
       position.collateralOutCount += INT_ONE;
-      validatePosition(event, account, pool, position);
-
       break;
     case EventType.Liquidated:
       position.liquidationCount += INT_ONE;
-      closePosition(event, account, pool, position);
-
       break;
-
     default:
       break;
   }
 
-  if (position.collateralBalanceUSD != BIGDECIMAL_ZERO) {
-    position.leverage = position.balanceUSD.div(position.collateralBalanceUSD);
+  let isLong = true;
+  if (position.side == PositionSide.SHORT) {
+    isLong = false;
+  }
+  const vaultContract = Vault.bind(
+    Address.fromBytes(NetworkConfigs.getVaultAddress())
+  );
+  const tryGetPosition = vaultContract.try_getPosition(
+    Address.fromBytes(account.id),
+    collateralTokenAddress,
+    indexTokenAddress,
+    isLong
+  );
+  if (!tryGetPosition.reverted) {
+    position.balanceUSD = tryGetPosition.value
+      .getValue0()
+      .div(PRICE_PRECISION)
+      .toBigDecimal();
+    position.collateralBalanceUSD = tryGetPosition.value
+      .getValue1()
+      .div(PRICE_PRECISION)
+      .toBigDecimal();
+
+    const indexToken = getOrCreateToken(event, indexTokenAddress);
+    if (indexToken.lastPriceUSD && indexToken.lastPriceUSD != BIGDECIMAL_ZERO) {
+      position.balance = bigDecimalToBigInt(
+        position.balanceUSD
+          .times(exponentToBigDecimal(indexToken.decimals))
+          .div(indexToken.lastPriceUSD!)
+      );
+    }
+    const collateralToken = getOrCreateToken(event, collateralTokenAddress);
+    if (
+      collateralToken.lastPriceUSD &&
+      collateralToken.lastPriceUSD != BIGDECIMAL_ZERO
+    ) {
+      position.collateralBalance = bigDecimalToBigInt(
+        position.collateralBalanceUSD
+          .times(exponentToBigDecimal(collateralToken.decimals))
+          .div(collateralToken.lastPriceUSD!)
+      );
+    }
+
+    if (position.collateralBalanceUSD != BIGDECIMAL_ZERO) {
+      position.leverage = position.balanceUSD.div(
+        position.collateralBalanceUSD
+      );
+    }
   }
 
-  // let isLong = true;
-  // if (position.side == PositionSide.SHORT) {
-  //   isLong = false;
-  // }
-  // const vaultContract = Vault.bind(
-  //   Address.fromBytes(NetworkConfigs.getVaultAddress())
-  // );
-  // const tryGetPosition = vaultContract.try_getPosition(
-  //   Address.fromBytes(account.id),
-  //   collateralTokenAddress,
-  //   indexTokenAddress,
-  //   isLong
-  // );
-  // if (tryGetPosition.reverted) {
-  //   log.warning("tryGetPosition.reverted", []);
-  // } else {
-  //   const positionBalanceUSD = tryGetPosition.value
-  //     .getValue0()
-  //     .div(PRICE_PRECISION)
-  //     .toBigDecimal();
-  //   const positionCollateralBalanceUSD = tryGetPosition.value
-  //     .getValue1()
-  //     .div(PRICE_PRECISION)
-  //     .toBigDecimal();
-
-  //   const positionFundingrateOpen = tryGetPosition.value
-  //     .getValue3()
-  //     .divDecimal(FUNDING_PRECISION);
-
-  //   log.warning(
-  //     "position.balanceUSD {} position.collateralBalanceUSD {} fundingrateOpen {}",
-  //     [
-  //       position.balanceUSD.toString(),
-  //       position.collateralBalanceUSD.toString(),
-  //       position.fundingrateOpen.toString(),
-  //     ]
-  //   );
-  //   log.warning("balanceUSD {} collateralBalanceUSD {} fundingrateOpen {}", [
-  //     positionBalanceUSD.toString(),
-  //     positionCollateralBalanceUSD.toString(),
-  //     positionFundingrateOpen.toString(),
-  //   ]);
-  // }
-
   position.save();
+
+  if (position.balance == BIGINT_ZERO) {
+    closePosition(event, account, pool, position);
+  }
 
   createPositionSnapshot(event, position);
 
@@ -257,57 +240,6 @@ export function createPositionSnapshot(
   snapshot.timestamp = event.block.timestamp;
 
   snapshot.save();
-}
-
-function validatePosition(
-  event: ethereum.Event,
-  account: Account,
-  pool: LiquidityPool,
-  position: Position
-): void {
-  if (position.balanceUSD.le(BIGDECIMAL_ZERO)) {
-    closePosition(event, account, pool, position);
-  }
-
-  // balanceUSD is more accurate data as it comes from event data, re-calcuate balance with balanceUSD in case there is problem with balance.
-  // if (position.balance < BIGINT_ZERO) {
-  //   // log.error("Negative balance in position {}, balance: {}", [
-  //   //   position.id.toHexString(),
-  //   //   position.balance.toString(),
-  //   // ]);
-  //   position.balance = BIGINT_ZERO;
-  //   const indexToken = getOrCreateToken(
-  //     event,
-  //     Address.fromBytes(position.asset)
-  //   );
-  //   if (indexToken.lastPriceUSD && indexToken.lastPriceUSD != BIGDECIMAL_ZERO) {
-  //     position.balance = bigDecimalToBigInt(
-  //       position.balanceUSD
-  //         .times(exponentToBigDecimal(indexToken.decimals))
-  //         .div(indexToken.lastPriceUSD!)
-  //     );
-  //   }
-  // }
-
-  // if (position.collateralBalance < BIGINT_ZERO) {
-  //   position.collateralBalance = BIGINT_ZERO;
-  //   const collateralToken = getOrCreateToken(
-  //     event,
-  //     Address.fromBytes(position.collateral)
-  //   );
-  //   if (
-  //     collateralToken.lastPriceUSD &&
-  //     collateralToken.lastPriceUSD != BIGDECIMAL_ZERO
-  //   ) {
-  //     position.collateralBalance = bigDecimalToBigInt(
-  //       position.collateralBalanceUSD
-  //         .times(exponentToBigDecimal(collateralToken.decimals))
-  //         .div(collateralToken.lastPriceUSD!)
-  //     );
-  //   }
-  // }
-
-  // position.save();
 }
 
 function closePosition(

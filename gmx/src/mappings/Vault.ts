@@ -1,4 +1,4 @@
-import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
+import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import {
   Swap,
   IncreasePoolAmount,
@@ -224,9 +224,7 @@ export function handleUpdatePositionEvent(
     account,
     pool,
     collateralTokenAddress,
-    collateralUSDDelta,
     indexTokenAddress,
-    sizeUSDDelta,
     positionSide,
     eventType
   );
