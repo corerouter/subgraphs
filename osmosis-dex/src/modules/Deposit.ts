@@ -236,7 +236,7 @@ function joinPoolHandler(
   liquidityPool.save();
 
   const prevTVL = liquidityPool.totalValueLockedUSD;
-  utils.updatePoolTVLDeposit(liquidityPool, data.block);
+  utils.updatePoolTVL(liquidityPool, data.block);
   const tvlChange = liquidityPool.totalValueLockedUSD.minus(prevTVL);
 
   log.warning("joinPoolHandler() tvlChange is {} at height {} index {}", [

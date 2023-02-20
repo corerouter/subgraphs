@@ -670,7 +670,7 @@ export function initRegistry(): void {
       "TerraClassicUSD",
       "USTC",
       "6",
-      "1",
+      "0",
     ],
     [
       "ibc/204A582244FC241613DBB50B04D1D454116C58C4AF7866C186AA0D6EEAD42780",

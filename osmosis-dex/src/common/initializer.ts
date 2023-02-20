@@ -331,8 +331,8 @@ export function msgCreatePoolHandler(
     data.tx.index.toString(),
   ]);
   if (
-    poolId != BigInt.fromI32(560) ||
-    poolId != BigInt.fromI32(678) ||
+    poolId != BigInt.fromI32(560) &&
+    poolId != BigInt.fromI32(678) &&
     poolId != BigInt.fromI32(724)
   ) {
     return;
@@ -411,7 +411,7 @@ export function msgCreatePoolHandler(
   );
   liquidityPool.save();
 
-  utils.updatePoolTVLCreatePool(liquidityPool, data.block);
+  utils.updatePoolTVL(liquidityPool, data.block);
   utils.updateProtocolAfterNewLiquidityPool(liquidityPool.totalValueLockedUSD);
 
   return;

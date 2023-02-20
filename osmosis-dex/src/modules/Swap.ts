@@ -198,7 +198,7 @@ function swap(
 
   let volumeUSD = constants.BIGDECIMAL_ZERO;
   const prevTVL = liquidityPool.totalValueLockedUSD;
-  const hasPriceData = utils.updatePoolTVLForSwap(liquidityPool, block);
+  const hasPriceData = utils.updatePoolTVL(liquidityPool, block);
   if (hasPriceData) {
     volumeUSD = updatePriceForSwap(
       liquidityPoolId,
@@ -272,7 +272,6 @@ function updatePriceForSwap(
 
   if (tokenIn._isStableCoin && !tokenOut._isStableCoin) {
     volumeUSD = updateOtherTokenPrice(
-      liquidityPoolId,
       tokenIn,
       tokenInAmount,
       tokenOut,
@@ -281,7 +280,6 @@ function updatePriceForSwap(
     );
   } else if (!tokenIn._isStableCoin && tokenOut._isStableCoin) {
     volumeUSD = updateOtherTokenPrice(
-      liquidityPoolId,
       tokenOut,
       tokenOutAmount,
       tokenIn,
@@ -294,7 +292,6 @@ function updatePriceForSwap(
     (tokenIn.id == constants.OSMO_DENOM && tokenOut.id != constants.ATOM_DENOM)
   ) {
     volumeUSD = updateOtherTokenPrice(
-      liquidityPoolId,
       tokenIn,
       tokenInAmount,
       tokenOut,
@@ -307,7 +304,6 @@ function updatePriceForSwap(
     (tokenIn.id != constants.OSMO_DENOM && tokenOut.id == constants.ATOM_DENOM)
   ) {
     volumeUSD = updateOtherTokenPrice(
-      liquidityPoolId,
       tokenOut,
       tokenOutAmount,
       tokenIn,
@@ -319,7 +315,6 @@ function updatePriceForSwap(
 }
 
 function updateOtherTokenPrice(
-  liquidityPoolId: string,
   baseToken: Token,
   baseTokenAmount: BigInt,
   otherToken: Token,
@@ -330,7 +325,6 @@ function updateOtherTokenPrice(
   if (
     !baseToken.lastPriceUSD ||
     baseToken.lastPriceUSD <= constants.BIGDECIMAL_ZERO
-    // || (otherToken._lastPriceDate != null && otherToken._lastPriceDate == id)
   ) {
     return constants.BIGDECIMAL_ZERO;
   }

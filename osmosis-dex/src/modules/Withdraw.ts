@@ -250,7 +250,7 @@ function exitPoolHandler(
   liquidityPool.save();
 
   const prevTVL = liquidityPool.totalValueLockedUSD;
-  utils.updatePoolTVLDeposit(liquidityPool, data.block);
+  utils.updatePoolTVL(liquidityPool, data.block);
 
   log.warning("exitPoolHandler() tvlChange is {} at height {} index {}", [
     prevTVL.minus(liquidityPool.totalValueLockedUSD).toString(),
