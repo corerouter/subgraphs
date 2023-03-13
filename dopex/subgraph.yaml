@@ -1,0 +1,995 @@
+specVersion: 0.0.4
+schema:
+  file: ./schema.graphql
+dataSources:
+#These ssov are not generated in a factory mode, so they must be listed here one by one.
+  - kind: ethereum/contract
+    name:  RDPXMonthlyCalls
+    network: arbitrum-one
+    source:
+      address:  "0xd74c61ca8917Be73377D74A007E6f002c25Efb4e"
+      abi: Ssov
+      startBlock: 22835202
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  DPXMonthlyCalls
+    network: arbitrum-one
+    source:
+      address:  "0x05E7ACeD3b7727f9129E6d302B488cd8a1e0C817"
+      abi: Ssov
+      startBlock: 22835189
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  stETHMonthlyCalls
+    network: arbitrum-one
+    source:
+      address:  "0x475a5a712b741b9ab992e6af0b9e5adee3d1851b"
+      abi: Ssov
+      startBlock: 56935590
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  RDPXWeeklyCalls
+    network: arbitrum-one
+    source:
+      address:  "0xCdaACF37726Bf1017821b5169e22EB34734B28A8"
+      abi: Ssov
+      startBlock: 22833452
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  DPXWeeklyCalls
+    network: arbitrum-one
+    source:
+      address:  "0x10FD85ec522C245a63239b9FC64434F58520bd1f"
+      abi: Ssov
+      startBlock: 22833438
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  stETHWeeklyCalls
+    network: arbitrum-one
+    source:
+      address:  "0xFca61E79F38a7a82c62f469f55A9df54CB8dF678"
+      abi: Ssov
+      startBlock: 51682881
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  BTCWeeklyPuts
+    network: arbitrum-one
+    source:
+      address:  "0xa7507c48d78345475b85bc27B9CE9B84b354CaF7"
+      abi: Ssov
+      startBlock: 22834300
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  ETHWeeklyPuts
+    network: arbitrum-one
+    source:
+      address:  "0x32449DF9c617C59f576dfC461D03f261F617aD5a"
+      abi: Ssov
+      startBlock: 22834243
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  CRVWeeklyPuts
+    network: arbitrum-one
+    source:
+      address:  "0x7C5aC7E4E352B733CF65721d9Fe28A17Da890159"
+      abi: Ssov
+      startBlock: 22834344
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  ETHMonthlyCalls
+    network: arbitrum-one
+    source:
+      address:  "0xC59836FEC63Cfb2E48b0aa00515056436D74Dc03"
+      abi: Ssov
+      startBlock: 27543139
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  GMXWeeklyPuts
+    network: arbitrum-one
+    source:
+      address:  "0xf071F0c56543A2671a2Dfc5FF51d5d858Be91514"
+      abi: Ssov
+      startBlock: 22834326
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  GOHMWeeklyPuts
+    network: arbitrum-one
+    source:
+      address:  "0x4269AF9076586230bF5fa3655144a5fe9CB877Fd"
+      abi: Ssov
+      startBlock: 22834312
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  DPXWeeklyPuts
+    network: arbitrum-one
+    source:
+      address:  "0xf71b2B6fE3c1d94863e751d6B455f750E714163C"
+      abi: Ssov
+      startBlock: 22834260
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  RDPXWeeklyPuts
+    network: arbitrum-one
+    source:
+      address:  "0xb4ec6B4eC9e42A42B0b8cdD3D6df8867546Cf11d"
+      abi: Ssov
+      startBlock: 22834278
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
+  - kind: ethereum/contract
+    name:  GOHMWeeklyCalls
+    network: arbitrum-one
+    source:
+      address:  "0x546cd36F761f1D984eEE1Dbe67cC4F86E75cAF0C"
+      abi: Ssov
+      startBlock: 22833459
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities: []
+      abis:
+        ###########################################
+        ############## Price Oracle ###############
+        ###########################################
+        # ERC20
+        - name: _ERC20
+          file: ./abis/Prices/ERC20.json
+        # Curve Contracts
+        - name: CurvePool
+          file: ./abis/Prices/Curve/Pool.json
+        - name: CurveRegistry
+          file: ./abis/Prices/Curve/Registry.json
+        - name: CalculationsCurve
+          file: ./abis/Prices/Calculations/Curve.json
+        # YearnLens Contracts
+        - name: YearnLensContract
+          file: ./abis/Prices/YearnLens.json
+        # Aave Oracle Contract
+        - name: AaveOracleContract
+          file: ./abis/Prices/AaveOracle.json
+        # SushiSwap Contracts
+        - name: CalculationsSushiSwap
+          file: ./abis/Prices/Calculations/SushiSwap.json
+        # ChainLink Contracts
+        - name: ChainLinkContract
+          file: ./abis/Prices/ChainLink.json
+        # Uniswap Contracts
+        - name: UniswapRouter
+          file: ./abis/Prices/Uniswap/Router.json
+        - name: UniswapFactory
+          file: ./abis/Prices/Uniswap/Factory.json
+        - name: UniswapPair
+          file: ./abis/Prices/Uniswap/Pair.json
+
+        - name: Ssov
+          file: ./abis/SsovV3.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: PriceOracle
+          file: ./abis/PriceOracle.json
+        - name: StakingStrategyV1
+          file: ./abis/StakingStrategyV1.json
+        - name: StakingStrategyV2
+          file: ./abis/StakingStrategyV2.json
+      eventHandlers:
+        - event: Deposit(uint256,indexed address,indexed address)
+          handler: handleDeposit
+        - event: Withdraw(uint256,uint256,uint256[],indexed address,indexed address)
+          handler: handleWithdraw
+        - event: Purchase(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handlePurchase
+        - event: Settle(uint256,uint256,uint256,uint256,uint256,indexed address,indexed address)
+          handler: handleSettle
+      file: ./src/mappings/Ssov.ts
