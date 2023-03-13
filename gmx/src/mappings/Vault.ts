@@ -191,7 +191,7 @@ export function handleUpdatePositionEvent(
   let collateralTokenAmountDelta = BIGINT_ZERO;
   if (
     collateralToken.lastPriceUSD &&
-    collateralToken.lastPriceUSD != BIGDECIMAL_ZERO
+    collateralToken.lastPriceUSD! > BIGDECIMAL_ZERO
   ) {
     collateralTokenAmountDelta = bigDecimalToBigInt(
       collateralUSDDelta
@@ -251,7 +251,7 @@ export function handleUpdatePositionEvent(
 
   switch (eventType) {
     case EventType.CollateralIn:
-      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, true);
+      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, true, isLong);
 
       createCollateralIn(
         event,
@@ -267,7 +267,7 @@ export function handleUpdatePositionEvent(
         let indexTokenAmountDelta = BIGINT_ZERO;
         if (
           indexToken.lastPriceUSD &&
-          indexToken.lastPriceUSD != BIGDECIMAL_ZERO
+          indexToken.lastPriceUSD! > BIGDECIMAL_ZERO
         ) {
           indexTokenAmountDelta = bigDecimalToBigInt(
             sizeUSDDelta
@@ -294,7 +294,7 @@ export function handleUpdatePositionEvent(
       );
       break;
     case EventType.CollateralOut:
-      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, false);
+      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, false, isLong);
 
       createCollateralOut(
         event,
@@ -315,7 +315,7 @@ export function handleUpdatePositionEvent(
       );
       break;
     case EventType.Liquidated:
-      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, false);
+      updatePoolOpenInterestUSD(event, pool, sizeUSDDelta, false, isLong);
 
       createLiquidate(
         event,

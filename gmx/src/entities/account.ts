@@ -1,11 +1,12 @@
 import { Address, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import { Account } from "../../generated/schema";
 import {
-  incrementProtocolUniqueBorrowers,
-  incrementProtocolUniqueLiquidators,
-  incrementProtocolUniqueLiquidatees,
-} from "./protocol";
-import { incrementPoolUniqueUsers } from "./pool";
+  incrementPoolUniqueUsers,
+  incrementPoolUniqueDepositors,
+  incrementPoolUniqueBorrowers,
+  incrementPoolUniqueLiquidators,
+  incrementPoolUniqueLiquidatees,
+} from "./pool";
 import { EventType } from "./event";
 import {
   BIGDECIMAL_ZERO,
@@ -37,7 +38,7 @@ export function getOrCreateAccount(
 
     account.depositCount = INT_ZERO;
     account.withdrawCount = INT_ZERO;
-    account._borrowCount = INT_ZERO;
+    account.borrowCount = INT_ZERO;
     account.collateralInCount = INT_ZERO;
     account.collateralOutCount = INT_ZERO;
     account.liquidateCount = INT_ZERO;
@@ -88,6 +89,9 @@ export function incrementAccountEventCount(
 ): void {
   switch (eventType) {
     case EventType.Deposit:
+      if (account.depositCount == INT_ZERO) {
+        incrementPoolUniqueDepositors(event);
+      }
       account.depositCount += INT_ONE;
       break;
     case EventType.Withdraw:
@@ -96,10 +100,10 @@ export function incrementAccountEventCount(
     case EventType.CollateralIn:
       account.collateralInCount += INT_ONE;
       if (sizeDelta > BIGINT_ZERO) {
-        if (account._borrowCount == INT_ZERO) {
-          incrementProtocolUniqueBorrowers(event);
+        if (account.borrowCount == INT_ZERO) {
+          incrementPoolUniqueBorrowers(event);
         }
-        account._borrowCount += INT_ONE;
+        account.borrowCount += INT_ONE;
       }
       break;
     case EventType.CollateralOut:
@@ -107,13 +111,13 @@ export function incrementAccountEventCount(
       break;
     case EventType.Liquidate:
       if (account.liquidateCount == INT_ZERO) {
-        incrementProtocolUniqueLiquidators(event);
+        incrementPoolUniqueLiquidators(event);
       }
       account.liquidateCount += INT_ONE;
       break;
     case EventType.Liquidated:
       if (account.liquidationCount == INT_ZERO) {
-        incrementProtocolUniqueLiquidatees(event);
+        incrementPoolUniqueLiquidatees(event);
       }
       account.liquidationCount += INT_ONE;
     case EventType.Swap:

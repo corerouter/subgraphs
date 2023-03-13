@@ -124,6 +124,8 @@ export function takeLiquidityPoolDailySnapshot(
     inputTokenLength
   ).fill(BIGDECIMAL_ZERO);
 
+  let prevCumulativeUniqueUsers = INT_ZERO;
+  let prevCumulativeUniqueDepositors = INT_ZERO;
   let prevCumulativeUniqueBorrowers = INT_ZERO;
   let prevCumulativeUniqueLiquidators = INT_ZERO;
   let prevCumulativeUniqueLiquidatees = INT_ZERO;
@@ -153,7 +155,7 @@ export function takeLiquidityPoolDailySnapshot(
     prevCumulativeTotalLiquidityPremiumUSD =
       prevPoolMetrics.cumulativeTotalLiquidityPremiumUSD;
 
-    prevInputTokens = prevPoolMetrics.inputTokens;
+    prevInputTokens = prevPoolMetrics._inputTokens;
     prevCumulativeInflowVolumeUSD = prevPoolMetrics.cumulativeInflowVolumeUSD;
     prevCumulativeClosedInflowVolumeUSD =
       prevPoolMetrics.cumulativeClosedInflowVolumeUSD;
@@ -175,6 +177,9 @@ export function takeLiquidityPoolDailySnapshot(
     prevCumulativeClosedInflowVolumeByTokenUSD =
       prevPoolMetrics._cumulativeClosedInflowVolumeByTokenUSD;
 
+    prevCumulativeUniqueUsers = prevPoolMetrics._cumulativeUniqueUsers;
+    prevCumulativeUniqueDepositors =
+      prevPoolMetrics._cumulativeUniqueDepositors;
     prevCumulativeUniqueBorrowers = prevPoolMetrics.cumulativeUniqueBorrowers;
     prevCumulativeUniqueLiquidators =
       prevPoolMetrics.cumulativeUniqueLiquidators;
@@ -198,9 +203,11 @@ export function takeLiquidityPoolDailySnapshot(
   poolMetrics.pool = pool.id;
 
   poolMetrics.totalValueLockedUSD = pool.totalValueLockedUSD;
-  poolMetrics.dailyOpenInterestUSD = pool.openInterestUSD;
+  poolMetrics.dailyLongOpenInterestUSD = pool.longOpenInterestUSD;
+  poolMetrics.dailyShortOpenInterestUSD = pool.shortOpenInterestUSD;
+  poolMetrics.dailyTotalOpenInterestUSD = pool.totalOpenInterestUSD;
 
-  poolMetrics.inputTokens = pool.inputTokens;
+  poolMetrics._inputTokens = pool.inputTokens;
   poolMetrics.inputTokenBalances = pool.inputTokenBalances;
   poolMetrics.inputTokenWeights = pool.inputTokenWeights;
   poolMetrics.outputTokenSupply = pool.outputTokenSupply;
@@ -345,6 +352,12 @@ export function takeLiquidityPoolDailySnapshot(
   poolMetrics.dailyOutflowVolumeByTokenAmount = dailyOutflowVolumeByTokenAmount;
   poolMetrics.dailyOutflowVolumeByTokenUSD = dailyOutflowVolumeByTokenUSD;
 
+  poolMetrics.dailyActiveUsers =
+    pool.cumulativeUniqueUsers - prevCumulativeUniqueUsers;
+  poolMetrics._cumulativeUniqueUsers = pool.cumulativeUniqueUsers;
+  poolMetrics.dailyActiveDepositors =
+    pool.cumulativeUniqueDepositors - prevCumulativeUniqueDepositors;
+  poolMetrics._cumulativeUniqueDepositors = pool.cumulativeUniqueDepositors;
   poolMetrics.dailyActiveBorrowers =
     pool.cumulativeUniqueBorrowers - prevCumulativeUniqueBorrowers;
   poolMetrics.cumulativeUniqueBorrowers = pool.cumulativeUniqueBorrowers;
@@ -355,25 +368,25 @@ export function takeLiquidityPoolDailySnapshot(
     pool.cumulativeUniqueLiquidatees - prevCumulativeUniqueLiquidatees;
   poolMetrics.cumulativeUniqueLiquidatees = pool.cumulativeUniqueLiquidatees;
 
-  poolMetrics.dailylongPositionCount =
+  poolMetrics.dailyLongPositionCount =
     pool.longPositionCount - prevLongPositionCount >= 0
       ? pool.longPositionCount - prevLongPositionCount
       : INT_ZERO;
   poolMetrics.longPositionCount = pool.longPositionCount;
-  poolMetrics.dailyshortPositionCount =
+  poolMetrics.dailyShortPositionCount =
     pool.shortPositionCount - prevShortPositionCount >= 0
       ? pool.shortPositionCount - prevShortPositionCount
       : INT_ZERO;
   poolMetrics.shortPositionCount = pool.shortPositionCount;
-  poolMetrics.dailyopenPositionCount =
+  poolMetrics.dailyOpenPositionCount =
     pool.openPositionCount - prevOpenPositionCount >= 0
       ? pool.openPositionCount - prevOpenPositionCount
       : INT_ZERO;
   poolMetrics.openPositionCount = pool.openPositionCount;
-  poolMetrics.dailyclosedPositionCount =
+  poolMetrics.dailyClosedPositionCount =
     pool.closedPositionCount - prevClosedPositionCount;
   poolMetrics.closedPositionCount = pool.closedPositionCount;
-  poolMetrics.dailycumulativePositionCount =
+  poolMetrics.dailyCumulativePositionCount =
     pool.cumulativePositionCount - prevCumulativePositionCount;
   poolMetrics.cumulativePositionCount = pool.cumulativePositionCount;
 
@@ -454,7 +467,7 @@ export function takeLiquidityPoolHourlySnapshot(
     prevCumulativeTotalLiquidityPremiumUSD =
       prevPoolMetrics.cumulativeTotalLiquidityPremiumUSD;
 
-    prevInputTokens = prevPoolMetrics.inputTokens;
+    prevInputTokens = prevPoolMetrics._inputTokens;
     prevCumulativeInflowVolumeUSD = prevPoolMetrics.cumulativeInflowVolumeUSD;
     prevCumulativeClosedInflowVolumeUSD =
       prevPoolMetrics.cumulativeClosedInflowVolumeUSD;
@@ -487,9 +500,11 @@ export function takeLiquidityPoolHourlySnapshot(
   poolMetrics.pool = pool.id;
 
   poolMetrics.totalValueLockedUSD = pool.totalValueLockedUSD;
-  poolMetrics.hourlyOpenInterestUSD = pool.openInterestUSD;
+  poolMetrics.hourlyLongOpenInterestUSD = pool.longOpenInterestUSD;
+  poolMetrics.hourlyShortOpenInterestUSD = pool.shortOpenInterestUSD;
+  poolMetrics.hourlyTotalOpenInterestUSD = pool.totalOpenInterestUSD;
 
-  poolMetrics.inputTokens = pool.inputTokens;
+  poolMetrics._inputTokens = pool.inputTokens;
   poolMetrics.inputTokenBalances = pool.inputTokenBalances;
   poolMetrics.inputTokenWeights = pool.inputTokenWeights;
   poolMetrics.outputTokenSupply = pool.outputTokenSupply;
@@ -772,7 +787,9 @@ export function takeFinancialDailySnapshot(
     );
   financialMetrics.cumulativeTotalLiquidityPremiumUSD =
     protocol.cumulativeTotalLiquidityPremiumUSD;
-  financialMetrics.dailyOpenInterestUSD = protocol.openInterestUSD;
+  financialMetrics.dailyLongOpenInterestUSD = protocol.longOpenInterestUSD;
+  financialMetrics.dailyShortOpenInterestUSD = protocol.shortOpenInterestUSD;
+  financialMetrics.dailyTotalOpenInterestUSD = protocol.totalOpenInterestUSD;
 
   financialMetrics.save();
 }
@@ -793,16 +810,16 @@ export function takeUsageMetricsDailySnapshot(
 
   const tempUsageMetrics = _TempUsageMetricsDailySnapshot.load(id);
   if (tempUsageMetrics) {
-    usageMetrics.dailylongPositionCount =
-      tempUsageMetrics.dailylongPositionCount;
-    usageMetrics.dailyshortPositionCount =
-      tempUsageMetrics.dailyshortPositionCount;
-    usageMetrics.dailyopenPositionCount =
-      tempUsageMetrics.dailyopenPositionCount;
-    usageMetrics.dailyclosedPositionCount =
-      tempUsageMetrics.dailyclosedPositionCount;
-    usageMetrics.dailycumulativePositionCount =
-      tempUsageMetrics.dailycumulativePositionCount;
+    usageMetrics.dailyLongPositionCount =
+      tempUsageMetrics.dailyLongPositionCount;
+    usageMetrics.dailyShortPositionCount =
+      tempUsageMetrics.dailyShortPositionCount;
+    usageMetrics.dailyOpenPositionCount =
+      tempUsageMetrics.dailyOpenPositionCount;
+    usageMetrics.dailyClosedPositionCount =
+      tempUsageMetrics.dailyClosedPositionCount;
+    usageMetrics.dailyCumulativePositionCount =
+      tempUsageMetrics.dailyCumulativePositionCount;
 
     usageMetrics.dailyTransactionCount = tempUsageMetrics.dailyTransactionCount;
     usageMetrics.dailyDepositCount = tempUsageMetrics.dailyDepositCount;
@@ -821,11 +838,11 @@ export function takeUsageMetricsDailySnapshot(
     usageMetrics.dailyCollateralIn = tempUsageMetrics.dailyCollateralIn;
     usageMetrics.dailyCollateralOut = tempUsageMetrics.dailyCollateralOut;
   } else {
-    usageMetrics.dailylongPositionCount = INT_ZERO;
-    usageMetrics.dailyshortPositionCount = INT_ZERO;
-    usageMetrics.dailyopenPositionCount = INT_ZERO;
-    usageMetrics.dailyclosedPositionCount = INT_ZERO;
-    usageMetrics.dailycumulativePositionCount = INT_ZERO;
+    usageMetrics.dailyLongPositionCount = INT_ZERO;
+    usageMetrics.dailyShortPositionCount = INT_ZERO;
+    usageMetrics.dailyOpenPositionCount = INT_ZERO;
+    usageMetrics.dailyClosedPositionCount = INT_ZERO;
+    usageMetrics.dailyCumulativePositionCount = INT_ZERO;
 
     usageMetrics.dailyTransactionCount = INT_ZERO;
     usageMetrics.dailyDepositCount = INT_ZERO;
@@ -919,11 +936,11 @@ export function getOrCreateTempUsageMetricsDailySnapshot(
     usageMetrics.days = day;
     usageMetrics.protocol = protocol.id;
 
-    usageMetrics.dailylongPositionCount = INT_ZERO;
-    usageMetrics.dailyshortPositionCount = INT_ZERO;
-    usageMetrics.dailyopenPositionCount = INT_ZERO;
-    usageMetrics.dailyclosedPositionCount = INT_ZERO;
-    usageMetrics.dailycumulativePositionCount = INT_ZERO;
+    usageMetrics.dailyLongPositionCount = INT_ZERO;
+    usageMetrics.dailyShortPositionCount = INT_ZERO;
+    usageMetrics.dailyOpenPositionCount = INT_ZERO;
+    usageMetrics.dailyClosedPositionCount = INT_ZERO;
+    usageMetrics.dailyCumulativePositionCount = INT_ZERO;
 
     usageMetrics.dailyTransactionCount = INT_ZERO;
     usageMetrics.dailyDepositCount = INT_ZERO;
@@ -1053,14 +1070,14 @@ export function updateTempUsageMetrics(
 
   if (openPositionCount > INT_ZERO) {
     if (PositionSide.LONG == positionSide) {
-      usageMetricsDaily.dailylongPositionCount += INT_ONE;
+      usageMetricsDaily.dailyLongPositionCount += INT_ONE;
     } else {
-      usageMetricsDaily.dailyshortPositionCount += INT_ONE;
+      usageMetricsDaily.dailyShortPositionCount += INT_ONE;
     }
-    usageMetricsDaily.dailyopenPositionCount += INT_ONE;
-    usageMetricsDaily.dailycumulativePositionCount += INT_ONE;
+    usageMetricsDaily.dailyOpenPositionCount += INT_ONE;
+    usageMetricsDaily.dailyCumulativePositionCount += INT_ONE;
   } else if (openPositionCount < INT_ZERO) {
-    usageMetricsDaily.dailyclosedPositionCount += INT_ONE;
+    usageMetricsDaily.dailyClosedPositionCount += INT_ONE;
   }
 
   usageMetricsDaily.save();
