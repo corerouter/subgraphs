@@ -1,0 +1,576 @@
+stdout: stderr: stdout: stderr: stdout: stderr: stdout: stderr: stdout: stderr: stdout: stderr: stdout: stderr: stdout: [32m[39m
+[32mTypes generated successfully[39m
+[32m[39m
+stderr: - Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.1 to 0.0.2[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.2 to 0.0.3[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.3 to 0.0.4[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.4 to 0.0.5[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.5 to 0.0.6[39m
+- Apply migrations
+  [90mSkip migration: Bump manifest specVersion from 0.0.1 to 0.0.2[39m
+- Apply migrations
+  [90mSkip migration: Bump manifest specVersion from 0.0.2 to 0.0.4[39m
+- Apply migrations
+✔ Apply migrations
+- Load subgraph from subgraph.yaml
+✔ Load subgraph from subgraph.yaml
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/ERC20.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Curve/Pool.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Curve/Registry.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Calculations/Curve.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/YearnLens.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/AaveOracle.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Calculations/SushiSwap.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/ChainLink.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Router.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Factory.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Pair.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Vault.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/ERC20.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/ERC20.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Curve/Pool.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Curve/Registry.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Calculations/Curve.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/YearnLens.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/AaveOracle.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Calculations/SushiSwap.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/ChainLink.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Router.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Factory.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Pair.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/VaultUtils.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/PositionVault.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/ERC20.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/ERC20.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Curve/Pool.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Curve/Registry.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Calculations/Curve.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/YearnLens.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/AaveOracle.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Calculations/SushiSwap.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/ChainLink.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Router.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Factory.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/Prices/Uniswap/Pair.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/ComplexRewarderPerSec.json[39m
+- Load contract ABIs
+  [90mLoad contract ABI from abis/ERC20.json[39m
+- Load contract ABIs
+✔ Load contract ABIs
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: _ERC20 (abis/Prices/ERC20.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/_ERC20.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CurvePool (abis/Prices/Curve/Pool.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/CurvePool.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CurveRegistry (abis/Prices/Curve/Registry.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/CurveRegistry.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CalculationsCurve (abis/Prices/Calculations/Curve.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/CalculationsCurve.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: YearnLensContract (abis/Prices/YearnLens.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/YearnLensContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: AaveOracleContract (abis/Prices/AaveOracle.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/AaveOracleContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CalculationsSushiSwap (abis/Prices/Calculations/SushiSwap.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/CalculationsSushiSwap.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: ChainLinkContract (abis/Prices/ChainLink.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/ChainLinkContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapRouter (abis/Prices/Uniswap/Router.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/UniswapRouter.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapFactory (abis/Prices/Uniswap/Factory.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/UniswapFactory.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapPair (abis/Prices/Uniswap/Pair.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/UniswapPair.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: Vault (abis/Vault.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/Vault.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: ERC20 (abis/ERC20.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/Vault/ERC20.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: _ERC20 (abis/Prices/ERC20.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/_ERC20.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CurvePool (abis/Prices/Curve/Pool.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/CurvePool.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CurveRegistry (abis/Prices/Curve/Registry.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/CurveRegistry.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CalculationsCurve (abis/Prices/Calculations/Curve.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/CalculationsCurve.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: YearnLensContract (abis/Prices/YearnLens.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/YearnLensContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: AaveOracleContract (abis/Prices/AaveOracle.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/AaveOracleContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CalculationsSushiSwap (abis/Prices/Calculations/SushiSwap.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/CalculationsSushiSwap.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: ChainLinkContract (abis/Prices/ChainLink.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/ChainLinkContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapRouter (abis/Prices/Uniswap/Router.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/UniswapRouter.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapFactory (abis/Prices/Uniswap/Factory.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/UniswapFactory.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapPair (abis/Prices/Uniswap/Pair.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/UniswapPair.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: VaultUtils (abis/VaultUtils.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/VaultUtils.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: PositionVault (abis/PositionVault.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/PositionVault.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: ERC20 (abis/ERC20.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/VaultUtils/ERC20.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: _ERC20 (abis/Prices/ERC20.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/_ERC20.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CurvePool (abis/Prices/Curve/Pool.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/CurvePool.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CurveRegistry (abis/Prices/Curve/Registry.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/CurveRegistry.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CalculationsCurve (abis/Prices/Calculations/Curve.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/CalculationsCurve.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: YearnLensContract (abis/Prices/YearnLens.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/YearnLensContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: AaveOracleContract (abis/Prices/AaveOracle.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/AaveOracleContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: CalculationsSushiSwap (abis/Prices/Calculations/SushiSwap.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/CalculationsSushiSwap.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: ChainLinkContract (abis/Prices/ChainLink.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/ChainLinkContract.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapRouter (abis/Prices/Uniswap/Router.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/UniswapRouter.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapFactory (abis/Prices/Uniswap/Factory.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/UniswapFactory.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: UniswapPair (abis/Prices/Uniswap/Pair.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/UniswapPair.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: ComplexRewarderPerSec (abis/ComplexRewarderPerSec.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/ComplexRewarderPerSec.ts[39m
+- Generate types for contract ABIs
+  [90mGenerate types for contract ABI: ERC20 (abis/ERC20.json)[39m
+- Generate types for contract ABIs
+  [90mWrite types to generated/ComplexRewarderPerSec/ERC20.ts[39m
+- Generate types for contract ABIs
+✔ Generate types for contract ABIs
+- Generate types for data source templates
+✔ Generate types for data source templates
+- Load data source template ABIs
+✔ Load data source template ABIs
+- Generate types for data source template ABIs
+✔ Generate types for data source template ABIs
+- Load GraphQL schema from schema.graphql
+✔ Load GraphQL schema from schema.graphql
+- Generate types for GraphQL schema
+  [90mWrite types to generated/schema.ts[39m
+- Generate types for GraphQL schema
+✔ Generate types for GraphQL schema
+stdout: 
+[32mBuild completed: QmYMZ5LMZrznj6a3faURfbkDZU1uD15KNyChBkpyjxoca4[39m
+
+[32mDeployed to https://thegraph.com/explorer/subgraph/corerouter/vela-exchange-arbitrum[39m
+[0m[0m
+[0mSubgraph endpoints:[0m
+[0mQueries (HTTP):     https://api.thegraph.com/subgraphs/name/corerouter/vela-exchange-arbitrum[0m
+
+stderr: - Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.1 to 0.0.2[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.2 to 0.0.3[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.3 to 0.0.4[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.4 to 0.0.5[39m
+- Apply migrations
+  [90mSkip migration: Bump mapping apiVersion from 0.0.5 to 0.0.6[39m
+- Apply migrations
+  [90mSkip migration: Bump manifest specVersion from 0.0.1 to 0.0.2[39m
+- Apply migrations
+  [90mSkip migration: Bump manifest specVersion from 0.0.2 to 0.0.4[39m
+- Apply migrations
+✔ Apply migrations
+- Load subgraph from subgraph.yaml
+✔ Load subgraph from subgraph.yaml
+- Compile subgraph
+  [90mCompile data source: Vault => build/Vault/Vault.wasm[39m
+- Compile subgraph
+  [90mCompile data source: VaultUtils => build/VaultUtils/VaultUtils.wasm[39m
+- Compile subgraph
+  [90mCompile data source: ComplexRewarderPerSec => build/ComplexRewarderPerSec/ComplexRewarderPerSec.wasm[39m
+- Compile subgraph
+✔ Compile subgraph
+- Write compiled subgraph to build/
+  [90mCopy schema file build/schema.graphql[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/ERC20.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/Curve/Pool.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/Curve/Registry.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/Calculations/Curve.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/YearnLens.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/AaveOracle.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/Calculations/SushiSwap.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/ChainLink.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/Uniswap/Router.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/Uniswap/Factory.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Prices/Uniswap/Pair.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/Vault.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/Vault/abis/ERC20.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/ERC20.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/Curve/Pool.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/Curve/Registry.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/Calculations/Curve.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/YearnLens.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/AaveOracle.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/Calculations/SushiSwap.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/ChainLink.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/Uniswap/Router.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/Uniswap/Factory.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/Prices/Uniswap/Pair.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/VaultUtils.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/PositionVault.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/VaultUtils/abis/ERC20.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/ERC20.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/Curve/Pool.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/Curve/Registry.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/Calculations/Curve.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/YearnLens.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/AaveOracle.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/Calculations/SushiSwap.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/ChainLink.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/Uniswap/Router.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/Uniswap/Factory.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/Prices/Uniswap/Pair.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/ComplexRewarderPerSec.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph file build/ComplexRewarderPerSec/abis/ERC20.json[39m
+- Write compiled subgraph to build/
+  [90mWrite subgraph manifest build/subgraph.yaml[39m
+- Write compiled subgraph to build/
+✔ Write compiled subgraph to build/
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/schema.graphql[39m
+- Upload subgraph to IPFS
+  [90m              .. QmfDVqPsZHbKprKboTv9ZjECCLe2RDAEoJiwup2BTkJuiS[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/ERC20.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmcU3ydmhYACc77Zo28TUPqUG6FLPUshF9pQewMaPUP4B7[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/Curve/Pool.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmaiNSXwra1btEev7q2EYTmLZtuE3xVHT3YdFnTk26e4hq[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/Curve/Registry.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmTz4kSWY3m98b8DMPHy2HRE5ubmwm6Jv7irwdBjf1y5oA[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/Calculations/Curve.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmNgN5gW4B1K3rA5sqbHKUh6tdTruG5h7RXaiKTn6StL2t[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/YearnLens.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmNwJ2ZhnjLAJHVquoz12kUtgLCnuq4dWkUqBRR2Y9vQM4[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/AaveOracle.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmfBupEX5LHCKEZFGy9v4aunRAC6FgzaJA9gF6aCnzZ9jQ[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/Calculations/SushiSwap.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmZZZFdd6n1onC5Go3pEBXpHx5hQXEJVKpGLdN9b3yUfY1[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/ChainLink.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmartT4DPfja3wNaie5CV4Pw16GyxQxTjXbocymxqhqW6c[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/Uniswap/Router.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmbuLeCA4gwWtLasXKDqF9oE2P6f1h4SMuhFGNWRdGhFze[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/Uniswap/Factory.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmZ55G1yYFzde8Vcq4cpLfNgPSEibpLi9aYCqS1jEvCKQ9[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Prices/Uniswap/Pair.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmbPLMADBP8L6LBVP3ZBQ8RgG7ghamD8DvbdUxHAjZrLgm[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/Vault.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmZv4WDY8TCd5ToaJioPvnfrwg7WuydRLhH1wHmN7Rq41w[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/abis/ERC20.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmXuTbDkNrN27VydxbS2huvKRk62PMgUTdPDWkxcr2w7j2[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/ERC20.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmcU3ydmhYACc77Zo28TUPqUG6FLPUshF9pQewMaPUP4B7 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/Curve/Pool.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmaiNSXwra1btEev7q2EYTmLZtuE3xVHT3YdFnTk26e4hq (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/Curve/Registry.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmTz4kSWY3m98b8DMPHy2HRE5ubmwm6Jv7irwdBjf1y5oA (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/Calculations/Curve.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmNgN5gW4B1K3rA5sqbHKUh6tdTruG5h7RXaiKTn6StL2t (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/YearnLens.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmNwJ2ZhnjLAJHVquoz12kUtgLCnuq4dWkUqBRR2Y9vQM4 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/AaveOracle.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmfBupEX5LHCKEZFGy9v4aunRAC6FgzaJA9gF6aCnzZ9jQ (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/Calculations/SushiSwap.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmZZZFdd6n1onC5Go3pEBXpHx5hQXEJVKpGLdN9b3yUfY1 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/ChainLink.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmartT4DPfja3wNaie5CV4Pw16GyxQxTjXbocymxqhqW6c (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/Uniswap/Router.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmbuLeCA4gwWtLasXKDqF9oE2P6f1h4SMuhFGNWRdGhFze (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/Uniswap/Factory.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmZ55G1yYFzde8Vcq4cpLfNgPSEibpLi9aYCqS1jEvCKQ9 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/Prices/Uniswap/Pair.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmbPLMADBP8L6LBVP3ZBQ8RgG7ghamD8DvbdUxHAjZrLgm (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/VaultUtils.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmTtAGZXN2XkgAbmf2whGADXFm2uvnfMjfv8zFffPBpcL6[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/PositionVault.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmTemwXXGSXqKLWP63miAKR3DbpixxR1G5DkpdUucyyGXH[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/abis/ERC20.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmXuTbDkNrN27VydxbS2huvKRk62PMgUTdPDWkxcr2w7j2 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/ERC20.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmcU3ydmhYACc77Zo28TUPqUG6FLPUshF9pQewMaPUP4B7 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/Curve/Pool.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmaiNSXwra1btEev7q2EYTmLZtuE3xVHT3YdFnTk26e4hq (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/Curve/Registry.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmTz4kSWY3m98b8DMPHy2HRE5ubmwm6Jv7irwdBjf1y5oA (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/Calculations/Curve.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmNgN5gW4B1K3rA5sqbHKUh6tdTruG5h7RXaiKTn6StL2t (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/YearnLens.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmNwJ2ZhnjLAJHVquoz12kUtgLCnuq4dWkUqBRR2Y9vQM4 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/AaveOracle.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmfBupEX5LHCKEZFGy9v4aunRAC6FgzaJA9gF6aCnzZ9jQ (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/Calculations/SushiSwap.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmZZZFdd6n1onC5Go3pEBXpHx5hQXEJVKpGLdN9b3yUfY1 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/ChainLink.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmartT4DPfja3wNaie5CV4Pw16GyxQxTjXbocymxqhqW6c (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/Uniswap/Router.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmbuLeCA4gwWtLasXKDqF9oE2P6f1h4SMuhFGNWRdGhFze (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/Uniswap/Factory.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmZ55G1yYFzde8Vcq4cpLfNgPSEibpLi9aYCqS1jEvCKQ9 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/Prices/Uniswap/Pair.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmbPLMADBP8L6LBVP3ZBQ8RgG7ghamD8DvbdUxHAjZrLgm (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/ComplexRewarderPerSec.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmQzqZpHeeo8dRPtrUVc8vSx8jgH7ZaP4b5qLcBze8oZqJ[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/abis/ERC20.json[39m
+- Upload subgraph to IPFS
+  [90m              .. QmXuTbDkNrN27VydxbS2huvKRk62PMgUTdPDWkxcr2w7j2 (already uploaded)[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/Vault/Vault.wasm[39m
+- Upload subgraph to IPFS
+  [90m              .. QmWj4Rn1D1BK8ji2S8KpHhiJoMF6LNkVdtxns6T2cdzFgF[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/VaultUtils/VaultUtils.wasm[39m
+- Upload subgraph to IPFS
+  [90m              .. QmSh6f1mPaz4MsWCSqFpLHnWxbw1Y5ihJNNGc268ibVXui[39m
+- Upload subgraph to IPFS
+  [90mAdd file to IPFS build/ComplexRewarderPerSec/ComplexRewarderPerSec.wasm[39m
+- Upload subgraph to IPFS
+  [90m              .. QmQzBPhWmfq5t2E1H2RTHqa8arfqrPnUmZJcG8QGG2izdH[39m
+- Upload subgraph to IPFS
+✔ Upload subgraph to IPFS
+- Deploying to Graph node https://api.thegraph.com/deploy/
